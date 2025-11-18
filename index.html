@@ -143,7 +143,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
+            width: 300px;
             background-color: var(--dark);
             padding: 20px;
             display: flex;
@@ -317,6 +317,14 @@
             display: block;
         }
 
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            display: none;
+        }
+
         .zoom-controls {
             position: absolute;
             top: 15px;
@@ -365,6 +373,59 @@
             gap: 15px;
             color: var(--gray);
             font-size: 0.9rem;
+        }
+
+        /* Layers Panel */
+        .layers-panel {
+            background-color: var(--dark);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .layer-item.active {
+            background-color: rgba(108, 92, 231, 0.3);
+        }
+
+        .layer-visibility {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .layer-name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .layer-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .layer-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .layer-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         /* Modals */
@@ -612,18 +673,38 @@
                     <button class="btn btn-secondary" id="download-btn"><i class="fas fa-download"></i> Export</button>
                 </div>
             </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-layer-group"></i> Layers</h3>
+                <div class="layers-panel" id="layers-panel">
+                    <!-- Layers will be added here dynamically -->
+                </div>
+                <div class="controls">
+                    <button class="btn btn-outline" id="add-layer-btn"><i class="fas fa-plus"></i> Add Layer</button>
+                    <button class="btn btn-outline" id="delete-layer-btn"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-cog"></i> Canvas</h3>
+                <div class="controls">
+                    <button class="btn btn-outline" id="new-project-btn"><i class="fas fa-plus"></i> New Project</button>
+                    <button class="btn btn-outline" id="grid-toggle"><i class="fas fa-th"></i> Grid</button>
+                </div>
+            </div>
         </div>
 
         <!-- Canvas Area -->
         <div class="canvas-area">
             <div class="canvas-header">
-                <h2>Untitled Project</h2>
+                <h2 id="project-title">Untitled Project</h2>
                 <div class="canvas-actions">
-                    <button class="btn btn-outline" id="new-project-btn"><i class="fas fa-plus"></i> New Project</button>
+                    <button class="btn btn-outline" id="project-settings-btn"><i class="fas fa-cog"></i> Project Settings</button>
                 </div>
             </div>
             <div class="canvas-container">
                 <canvas id="drawing-canvas" width="800" height="600"></canvas>
+                <canvas id="grid-overlay" class="grid-overlay" width="800" height="600"></canvas>
                 <div class="zoom-controls">
                     <div class="zoom-btn" id="zoom-in"><i class="fas fa-plus"></i></div>
                     <div class="zoom-display" id="zoom-display">100%</div>
@@ -636,9 +717,10 @@
                     <span>Brush: <span id="current-brush">Normal</span></span>
                     <span>Size: <span id="current-size">10px</span></span>
                     <span>Color: <span id="current-color">#6c5ce7</span></span>
+                    <span>Layer: <span id="current-layer">Layer 1</span></span>
                 </div>
                 <div class="canvas-actions">
-                    <button class="btn btn-outline" id="grid-toggle"><i class="fas fa-th"></i> Grid</button>
+                    <button class="btn btn-outline" id="toggle-grid-btn"><i class="fas fa-th"></i> Toggle Grid</button>
                 </div>
             </div>
         </div>
@@ -723,6 +805,70 @@
         </div>
     </div>
 
+    <!-- Register Modal -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" class="form-control" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <input type="password" id="register-confirm" class="form-control" placeholder="Confirm your password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-register">Cancel</button>
+                <button class="btn btn-primary" id="confirm-register">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div class="modal" id="new-project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> New Project</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-project-name">Project Name</label>
+                    <input type="text" id="new-project-name" class="form-control" value="New Project">
+                </div>
+                <div class="form-group">
+                    <label for="canvas-width">Canvas Width</label>
+                    <input type="number" id="canvas-width" class="form-control" value="800" min="100" max="4000">
+                </div>
+                <div class="form-group">
+                    <label for="canvas-height">Canvas Height</label>
+                    <input type="number" id="canvas-height" class="form-control" value="600" min="100" max="4000">
+                </div>
+                <div class="form-group">
+                    <label for="canvas-background">Background Color</label>
+                    <input type="color" id="canvas-background" class="form-control" value="#ffffff">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-new-project">Cancel</button>
+                <button class="btn btn-primary" id="confirm-new-project">Create Project</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle"></i>
@@ -733,6 +879,8 @@
         // Canvas setup
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d');
+        const gridCanvas = document.getElementById('grid-overlay');
+        const gridCtx = gridCanvas.getContext('2d');
         
         // App state
         let isDrawing = false;
@@ -746,12 +894,26 @@
         let undoStack = [];
         let redoStack = [];
         let rainbowHue = 0;
+        let isGridVisible = false;
+        let layers = [];
+        let currentLayerIndex = 0;
+        let currentProject = {
+            name: 'Untitled Project',
+            width: 800,
+            height: 600,
+            backgroundColor: '#ffffff'
+        };
+        let users = JSON.parse(localStorage.getItem('inkflowUsers')) || [];
+        let currentUser = null;
         
         // Initialize canvas
         function initCanvas() {
             // Set initial canvas background
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = currentProject.backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Initialize layers
+            initLayers();
             
             // Save initial state
             saveState();
@@ -761,6 +923,153 @@
             
             // Update UI
             updateBrushInfo();
+            updateProjectInfo();
+        }
+        
+        // Initialize layers
+        function initLayers() {
+            layers = [{
+                name: 'Layer 1',
+                visible: true,
+                canvas: document.createElement('canvas'),
+                ctx: null
+            }];
+            
+            layers[0].canvas.width = canvas.width;
+            layers[0].canvas.height = canvas.height;
+            layers[0].ctx = layers[0].canvas.getContext('2d');
+            layers[0].ctx.fillStyle = 'transparent';
+            layers[0].ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            renderLayers();
+            updateLayersPanel();
+        }
+        
+        // Render all layers to main canvas
+        function renderLayers() {
+            // Clear main canvas
+            ctx.fillStyle = currentProject.backgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw all visible layers
+            layers.forEach(layer => {
+                if (layer.visible) {
+                    ctx.drawImage(layer.canvas, 0, 0);
+                }
+            });
+        }
+        
+        // Update layers panel UI
+        function updateLayersPanel() {
+            const layersPanel = document.getElementById('layers-panel');
+            layersPanel.innerHTML = '';
+            
+            layers.forEach((layer, index) => {
+                const layerItem = document.createElement('div');
+                layerItem.className = `layer-item ${index === currentLayerIndex ? 'active' : ''}`;
+                layerItem.innerHTML = `
+                    <span class="layer-visibility">
+                        <i class="fas fa-${layer.visible ? 'eye' : 'eye-slash'}"></i>
+                    </span>
+                    <span class="layer-name">${layer.name}</span>
+                    <div class="layer-actions">
+                        <button class="layer-btn move-up-btn" ${index === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="layer-btn move-down-btn" ${index === layers.length - 1 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Layer visibility toggle
+                layerItem.querySelector('.layer-visibility').addEventListener('click', () => {
+                    layer.visible = !layer.visible;
+                    renderLayers();
+                    updateLayersPanel();
+                });
+                
+                // Layer selection
+                layerItem.addEventListener('click', (e) => {
+                    if (!e.target.closest('.layer-visibility') && 
+                        !e.target.closest('.move-up-btn') && 
+                        !e.target.closest('.move-down-btn')) {
+                        currentLayerIndex = index;
+                        updateLayersPanel();
+                        updateBrushInfo();
+                    }
+                });
+                
+                // Move layer up
+                const moveUpBtn = layerItem.querySelector('.move-up-btn');
+                if (moveUpBtn) {
+                    moveUpBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (index > 0) {
+                            [layers[index], layers[index-1]] = [layers[index-1], layers[index]];
+                            if (currentLayerIndex === index) currentLayerIndex--;
+                            else if (currentLayerIndex === index-1) currentLayerIndex++;
+                            renderLayers();
+                            updateLayersPanel();
+                        }
+                    });
+                }
+                
+                // Move layer down
+                const moveDownBtn = layerItem.querySelector('.move-down-btn');
+                if (moveDownBtn) {
+                    moveDownBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (index < layers.length - 1) {
+                            [layers[index], layers[index+1]] = [layers[index+1], layers[index]];
+                            if (currentLayerIndex === index) currentLayerIndex++;
+                            else if (currentLayerIndex === index+1) currentLayerIndex--;
+                            renderLayers();
+                            updateLayersPanel();
+                        }
+                    });
+                }
+                
+                layersPanel.appendChild(layerItem);
+            });
+        }
+        
+        // Add a new layer
+        function addLayer() {
+            const newLayer = {
+                name: `Layer ${layers.length + 1}`,
+                visible: true,
+                canvas: document.createElement('canvas'),
+                ctx: null
+            };
+            
+            newLayer.canvas.width = canvas.width;
+            newLayer.canvas.height = canvas.height;
+            newLayer.ctx = newLayer.canvas.getContext('2d');
+            newLayer.ctx.fillStyle = 'transparent';
+            newLayer.ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            layers.push(newLayer);
+            currentLayerIndex = layers.length - 1;
+            renderLayers();
+            updateLayersPanel();
+            showNotification('New layer added');
+        }
+        
+        // Delete current layer
+        function deleteLayer() {
+            if (layers.length <= 1) {
+                showNotification('Cannot delete the only layer', 'error');
+                return;
+            }
+            
+            layers.splice(currentLayerIndex, 1);
+            if (currentLayerIndex >= layers.length) {
+                currentLayerIndex = layers.length - 1;
+            }
+            renderLayers();
+            updateLayersPanel();
+            showNotification('Layer deleted');
         }
         
         // Set up all event listeners
@@ -818,8 +1127,13 @@
             document.getElementById('redo-btn').addEventListener('click', redo);
             document.getElementById('download-btn').addEventListener('click', showDownloadModal);
             document.getElementById('save-btn').addEventListener('click', showSaveModal);
-            document.getElementById('new-project-btn').addEventListener('click', newProject);
+            document.getElementById('new-project-btn').addEventListener('click', showNewProjectModal);
             document.getElementById('grid-toggle').addEventListener('click', toggleGrid);
+            document.getElementById('toggle-grid-btn').addEventListener('click', toggleGrid);
+            
+            // Layer buttons
+            document.getElementById('add-layer-btn').addEventListener('click', addLayer);
+            document.getElementById('delete-layer-btn').addEventListener('click', deleteLayer);
             
             // Zoom controls
             document.getElementById('zoom-in').addEventListener('click', () => zoom(0.1));
@@ -831,7 +1145,7 @@
             
             // Auth buttons
             document.getElementById('login-btn').addEventListener('click', () => showModal('login-modal'));
-            document.getElementById('register-btn').addEventListener('click', () => showModal('login-modal'));
+            document.getElementById('register-btn').addEventListener('click', () => showModal('register-modal'));
             
             // Keyboard shortcuts
             document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -850,6 +1164,14 @@
             // Login modal
             document.getElementById('confirm-login').addEventListener('click', login);
             document.getElementById('cancel-login').addEventListener('click', () => hideModal('login-modal'));
+            
+            // Register modal
+            document.getElementById('confirm-register').addEventListener('click', register);
+            document.getElementById('cancel-register').addEventListener('click', () => hideModal('register-modal'));
+            
+            // New project modal
+            document.getElementById('confirm-new-project').addEventListener('click', createNewProject);
+            document.getElementById('cancel-new-project').addEventListener('click', () => hideModal('new-project-modal'));
             
             // Close buttons
             document.querySelectorAll('.close-btn').forEach(btn => {
@@ -890,36 +1212,42 @@
             
             const [x, y] = getCoordinates(e);
             
+            // Get the current layer context
+            const layerCtx = layers[currentLayerIndex].ctx;
+            
             switch(currentTool) {
                 case 'normal':
                 case 'calligraphy':
-                    drawLine(lastX, lastY, x, y);
+                    drawLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'pixel':
-                    drawPixelLine(lastX, lastY, x, y);
+                    drawPixelLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'rainbow':
-                    drawRainbowLine(lastX, lastY, x, y);
+                    drawRainbowLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'fur':
-                    drawFurLine(lastX, lastY, x, y);
+                    drawFurLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'neon':
-                    drawNeonLine(lastX, lastY, x, y);
+                    drawNeonLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'shading':
-                    drawShadingLine(lastX, lastY, x, y);
+                    drawShadingLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'spray':
-                    drawSpray(x, y);
+                    drawSpray(layerCtx, x, y);
                     break;
                 case 'eraser':
-                    drawEraserLine(lastX, lastY, x, y);
+                    drawEraserLine(layerCtx, lastX, lastY, x, y);
                     break;
                 case 'glitter':
-                    drawGlitter(x, y);
+                    drawGlitter(layerCtx, x, y);
                     break;
             }
+            
+            // Render layers to main canvas
+            renderLayers();
             
             [lastX, lastY] = [x, y];
         }
@@ -937,7 +1265,7 @@
         }
         
         // Brush drawing functions
-        function drawLine(x1, y1, x2, y2) {
+        function drawLine(ctx, x1, y1, x2, y2) {
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
@@ -959,21 +1287,27 @@
             ctx.stroke();
         }
         
-        function drawPixelLine(x1, y1, x2, y2) {
-            // Draw pixelated line
+        function drawPixelLine(ctx, x1, y1, x2, y2) {
+            // Draw pixelated line - snap to grid
+            const gridSize = 10; // Size of each pixel grid cell
             const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+            
             for (let i = 0; i <= steps; i++) {
                 const t = i / steps;
-                const x = Math.round(x1 + (x2 - x1) * t);
-                const y = Math.round(y1 + (y2 - y1) * t);
+                let x = x1 + (x2 - x1) * t;
+                let y = y1 + (y2 - y1) * t;
+                
+                // Snap to grid
+                x = Math.round(x / gridSize) * gridSize;
+                y = Math.round(y / gridSize) * gridSize;
                 
                 ctx.fillStyle = currentColor;
                 ctx.globalAlpha = brushOpacity;
-                ctx.fillRect(x - brushSize/2, y - brushSize/2, brushSize, brushSize);
+                ctx.fillRect(x - gridSize/2, y - gridSize/2, gridSize, gridSize);
             }
         }
         
-        function drawRainbowLine(x1, y1, x2, y2) {
+        function drawRainbowLine(ctx, x1, y1, x2, y2) {
             // Rainbow brush that cycles through colors
             rainbowHue = (rainbowHue + 2) % 360;
             const rainbowColor = `hsl(${rainbowHue}, 100%, 50%)`;
@@ -989,7 +1323,7 @@
             ctx.stroke();
         }
         
-        function drawFurLine(x1, y1, x2, y2) {
+        function drawFurLine(ctx, x1, y1, x2, y2) {
             // Fur brush with multiple hair-like strokes
             const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
             for (let i = 0; i <= steps; i++) {
@@ -1015,7 +1349,7 @@
             }
         }
         
-        function drawNeonLine(x1, y1, x2, y2) {
+        function drawNeonLine(ctx, x1, y1, x2, y2) {
             // Neon brush with glow effect
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -1039,7 +1373,7 @@
             ctx.stroke();
         }
         
-        function drawShadingLine(x1, y1, x2, y2) {
+        function drawShadingLine(ctx, x1, y1, x2, y2) {
             // Shading brush with soft edges
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -1059,7 +1393,7 @@
             ctx.stroke();
         }
         
-        function drawSpray(x, y) {
+        function drawSpray(ctx, x, y) {
             // Spray paint effect
             const density = brushSize * 2;
             for (let i = 0; i < density; i++) {
@@ -1074,20 +1408,22 @@
             }
         }
         
-        function drawEraserLine(x1, y1, x2, y2) {
+        function drawEraserLine(ctx, x1, y1, x2, y2) {
             // Eraser tool
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
-            ctx.strokeStyle = '#ffffff';
+            ctx.strokeStyle = 'rgba(0,0,0,0)'; // Transparent
+            ctx.globalCompositeOperation = 'destination-out';
             ctx.globalAlpha = 1;
             ctx.lineWidth = brushSize;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
+            ctx.globalCompositeOperation = 'source-over'; // Reset
         }
         
-        function drawGlitter(x, y) {
+        function drawGlitter(ctx, x, y) {
             // Glitter effect with random sparkles
             const density = brushSize;
             for (let i = 0; i < density; i++) {
@@ -1107,10 +1443,55 @@
         
         function drawPoint(x, y) {
             // Draw a single point (used for spray and glitter on mousedown)
+            const layerCtx = layers[currentLayerIndex].ctx;
+            
             if (currentTool === 'spray') {
-                drawSpray(x, y);
+                drawSpray(layerCtx, x, y);
             } else if (currentTool === 'glitter') {
-                drawGlitter(x, y);
+                drawGlitter(layerCtx, x, y);
+            }
+            
+            renderLayers();
+        }
+        
+        // Grid functions
+        function toggleGrid() {
+            isGridVisible = !isGridVisible;
+            const gridOverlay = document.getElementById('grid-overlay');
+            
+            if (isGridVisible) {
+                gridOverlay.style.display = 'block';
+                drawGrid();
+                showNotification('Grid enabled');
+            } else {
+                gridOverlay.style.display = 'none';
+                showNotification('Grid disabled');
+            }
+        }
+        
+        function drawGrid() {
+            const gridSize = 10;
+            const width = gridCanvas.width;
+            const height = gridCanvas.height;
+            
+            gridCtx.clearRect(0, 0, width, height);
+            gridCtx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            gridCtx.lineWidth = 1;
+            
+            // Draw vertical lines
+            for (let x = 0; x <= width; x += gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(x, 0);
+                gridCtx.lineTo(x, height);
+                gridCtx.stroke();
+            }
+            
+            // Draw horizontal lines
+            for (let y = 0; y <= height; y += gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, y);
+                gridCtx.lineTo(width, y);
+                gridCtx.stroke();
             }
         }
         
@@ -1158,15 +1539,23 @@
         // Canvas controls
         function clearCanvas() {
             if (confirm('Are you sure you want to clear the canvas?')) {
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                layers.forEach(layer => {
+                    layer.ctx.clearRect(0, 0, canvas.width, canvas.height);
+                });
+                renderLayers();
                 saveState();
                 showNotification('Canvas cleared');
             }
         }
         
         function saveState() {
-            undoStack.push(canvas.toDataURL());
+            // Save the state of all layers
+            const state = layers.map(layer => ({
+                name: layer.name,
+                visible: layer.visible,
+                data: layer.canvas.toDataURL()
+            }));
+            undoStack.push(state);
             if (undoStack.length > 50) {
                 undoStack.shift();
             }
@@ -1176,25 +1565,47 @@
         function undo() {
             if (undoStack.length > 1) {
                 redoStack.push(undoStack.pop());
-                const img = new Image();
-                img.onload = function() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = undoStack[undoStack.length - 1];
+                const state = undoStack[undoStack.length - 1];
+                
+                // Restore all layers from state
+                state.forEach((layerState, index) => {
+                    if (index < layers.length) {
+                        const img = new Image();
+                        img.onload = function() {
+                            layers[index].ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            layers[index].ctx.drawImage(img, 0, 0);
+                            if (index === state.length - 1) {
+                                renderLayers();
+                            }
+                        };
+                        img.src = layerState.data;
+                    }
+                });
+                
                 showNotification('Undo completed');
             }
         }
         
         function redo() {
             if (redoStack.length > 0) {
-                const img = new Image();
-                img.onload = function() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = redoStack.pop();
-                undoStack.push(img.src);
+                const state = redoStack.pop();
+                undoStack.push(state);
+                
+                // Restore all layers from state
+                state.forEach((layerState, index) => {
+                    if (index < layers.length) {
+                        const img = new Image();
+                        img.onload = function() {
+                            layers[index].ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            layers[index].ctx.drawImage(img, 0, 0);
+                            if (index === state.length - 1) {
+                                renderLayers();
+                            }
+                        };
+                        img.src = layerState.data;
+                    }
+                });
+                
                 showNotification('Redo completed');
             }
         }
@@ -1215,6 +1626,131 @@
         
         function updateCanvasTransform() {
             canvas.style.transform = `scale(${zoomLevel})`;
+            gridCanvas.style.transform = `scale(${zoomLevel})`;
+        }
+        
+        // Project functions
+        function showNewProjectModal() {
+            document.getElementById('new-project-name').value = 'New Project';
+            document.getElementById('canvas-width').value = '800';
+            document.getElementById('canvas-height').value = '600';
+            document.getElementById('canvas-background').value = '#ffffff';
+            showModal('new-project-modal');
+        }
+        
+        function createNewProject() {
+            const name = document.getElementById('new-project-name').value;
+            const width = parseInt(document.getElementById('canvas-width').value);
+            const height = parseInt(document.getElementById('canvas-height').value);
+            const backgroundColor = document.getElementById('canvas-background').value;
+            
+            if (!name) {
+                showNotification('Please enter a project name', 'error');
+                return;
+            }
+            
+            if (width < 100 || width > 4000 || height < 100 || height > 4000) {
+                showNotification('Canvas dimensions must be between 100 and 4000 pixels', 'error');
+                return;
+            }
+            
+            // Update project settings
+            currentProject = {
+                name: name,
+                width: width,
+                height: height,
+                backgroundColor: backgroundColor
+            };
+            
+            // Resize canvases
+            canvas.width = width;
+            canvas.height = height;
+            gridCanvas.width = width;
+            gridCanvas.height = height;
+            
+            // Reset layers
+            initLayers();
+            
+            // Update UI
+            updateProjectInfo();
+            
+            hideModal('new-project-modal');
+            showNotification('New project created');
+        }
+        
+        function updateProjectInfo() {
+            document.getElementById('project-title').textContent = currentProject.name;
+        }
+        
+        // Authentication functions
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showNotification('Please enter both email and password', 'error');
+                return;
+            }
+            
+            // Check if user exists
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                hideModal('login-modal');
+                updateUserInterface();
+                showNotification(`Welcome back, ${user.username}!`);
+            } else {
+                showNotification('Invalid email or password', 'error');
+            }
+        }
+        
+        function register() {
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            
+            if (!username || !email || !password || !confirm) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirm) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            // Check if user already exists
+            if (users.find(u => u.email === email)) {
+                showNotification('User with this email already exists', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                username: username,
+                email: email,
+                password: password
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('inkflowUsers', JSON.stringify(users));
+            
+            currentUser = newUser;
+            hideModal('register-modal');
+            updateUserInterface();
+            showNotification('Account created successfully!');
+        }
+        
+        function updateUserInterface() {
+            if (currentUser) {
+                document.getElementById('login-btn').textContent = currentUser.username;
+                document.getElementById('register-btn').style.display = 'none';
+            } else {
+                document.getElementById('login-btn').textContent = 'Login';
+                document.getElementById('register-btn').style.display = 'block';
+            }
         }
         
         // Modal functions
@@ -1244,6 +1780,12 @@
         }
         
         function showSaveModal() {
+            if (!currentUser) {
+                showNotification('Please log in to save projects', 'error');
+                showModal('login-modal');
+                return;
+            }
+            
             showModal('save-modal');
         }
         
@@ -1256,42 +1798,12 @@
             showNotification(`Project "${projectName}" saved successfully!`);
         }
         
-        function newProject() {
-            if (confirm('Start a new project? Any unsaved changes will be lost.')) {
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                saveState();
-                showNotification('New project created');
-            }
-        }
-        
-        function toggleGrid() {
-            // This would toggle a grid overlay in a real implementation
-            showNotification('Grid toggled');
-        }
-        
-        function login() {
-            const email = document.getElementById('login-email').value;
-            
-            if (!email) {
-                showNotification('Please enter your email', 'error');
-                return;
-            }
-            
-            // In a real app, you would authenticate with a server
-            hideModal('login-modal');
-            showNotification(`Welcome back! Signed in as ${email}`);
-            
-            // Update UI for logged in state
-            document.getElementById('login-btn').textContent = 'My Account';
-            document.getElementById('register-btn').style.display = 'none';
-        }
-        
         // UI update functions
         function updateBrushInfo() {
             document.getElementById('current-brush').textContent = currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
             document.getElementById('current-size').textContent = `${brushSize}px`;
             document.getElementById('current-color').textContent = currentColor;
+            document.getElementById('current-layer').textContent = layers[currentLayerIndex].name;
         }
         
         function updateActivePresetColor() {
@@ -1338,6 +1850,10 @@
                     case 'd':
                         e.preventDefault();
                         showDownloadModal();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        showNewProjectModal();
                         break;
                 }
             }
