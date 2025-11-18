@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InkFlow Studio | Digital Drawing Tool</title>
+    <title>InkFlow Studio | Advanced Pixel Art</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Reset & Base Styles */
@@ -143,7 +143,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 250px;
+            width: 280px;
             background-color: var(--dark);
             padding: 20px;
             display: flex;
@@ -231,6 +231,9 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
         }
 
         .brush-btn {
@@ -443,35 +446,6 @@
             gap: 10px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .logo h1 {
-                font-size: 1.2rem;
-            }
-            
-            .brush-types {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-content {
-            animation: fadeIn 0.3s ease-out;
-        }
-
         /* Notification */
         .notification {
             position: fixed;
@@ -497,6 +471,30 @@
         .notification.warning {
             background-color: var(--warning);
             color: var(--dark);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            
+            .brush-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -527,24 +525,13 @@
                 <div class="color-picker">
                     <input type="color" id="color-picker" value="#6c5ce7">
                     <div class="preset-colors">
-                        <div class="preset-color active" style="background-color: #6c5ce7;" data-color="#6c5ce7"></div>
-                        <div class="preset-color" style="background-color: #fd79a8;" data-color="#fd79a8"></div>
-                        <div class="preset-color" style="background-color: #00b894;" data-color="#00b894"></div>
-                        <div class="preset-color" style="background-color: #fdcb6e;" data-color="#fdcb6e"></div>
-                        <div class="preset-color" style="background-color: #e17055;" data-color="#e17055"></div>
-                        <div class="preset-color" style="background-color: #0984e3;" data-color="#0984e3"></div>
-                        <div class="preset-color" style="background-color: #a29bfe;" data-color="#a29bfe"></div>
-                        <div class="preset-color" style="background-color: #2d3436;" data-color="#2d3436"></div>
+                        <div class="preset-color active" style="background-color: #ff6b6b;" data-color="#ff6b6b"></div>
+                        <div class="preset-color" style="background-color: #4fc3f7;" data-color="#4fc3f7"></div>
+                        <div class="preset-color" style="background-color: #8a2be2;" data-color="#8a2be2"></div>
+                        <div class="preset-color" style="background-color: #ffd166;" data-color="#ffd166"></div>
+                        <div class="preset-color" style="background-color: #06d6a0;" data-color="#06d6a0"></div>
+                        <div class="preset-color" style="background-color: #ff9e6d;" data-color="#ff9e6d"></div>
                     </div>
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <h3><i class="fas fa-sliders-h"></i> Brush</h3>
-                <div class="slider-container">
-                    <i class="fas fa-ruler-combined"></i>
-                    <input type="range" id="brush-size" min="1" max="50" value="5">
-                    <span class="slider-value" id="brush-size-value">5px</span>
                 </div>
                 <div class="slider-container">
                     <i class="fas fa-adjust"></i>
@@ -554,31 +541,56 @@
             </div>
 
             <div class="tool-group">
-                <h3><i class="fas fa-paint-brush"></i> Tools</h3>
+                <h3><i class="fas fa-sliders-h"></i> Brush</h3>
+                <div class="slider-container">
+                    <i class="fas fa-ruler-combined"></i>
+                    <input type="range" id="brush-size" min="1" max="40" value="10">
+                    <span class="slider-value" id="brush-size-value">10px</span>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-paint-brush"></i> Brushes</h3>
                 <div class="brush-types">
-                    <button class="brush-btn active" data-type="normal">
+                    <button class="brush-btn active" id="brush-normal" data-type="normal">
                         <div class="brush-icon"><i class="fas fa-paint-brush"></i></div>
-                        <div class="brush-name">Brush</div>
+                        <div class="brush-name">Normal</div>
                     </button>
-                    <button class="brush-btn" data-type="pencil">
-                        <div class="brush-icon"><i class="fas fa-pencil-alt"></i></div>
-                        <div class="brush-name">Pencil</div>
+                    <button class="brush-btn" id="brush-pixel" data-type="pixel">
+                        <div class="brush-icon"><i class="fas fa-th-large"></i></div>
+                        <div class="brush-name">Pixel</div>
                     </button>
-                    <button class="brush-btn" data-type="eraser">
+                    <button class="brush-btn" id="brush-rainbow" data-type="rainbow">
+                        <div class="brush-icon"><i class="fas fa-rainbow"></i></div>
+                        <div class="brush-name">Rainbow</div>
+                    </button>
+                    <button class="brush-btn" id="brush-fur" data-type="fur">
+                        <div class="brush-icon"><i class="fas fa-paw"></i></div>
+                        <div class="brush-name">Fur</div>
+                    </button>
+                    <button class="brush-btn" id="brush-neon" data-type="neon">
+                        <div class="brush-icon"><i class="fas fa-lightbulb"></i></div>
+                        <div class="brush-name">Neon</div>
+                    </button>
+                    <button class="brush-btn" id="brush-shading" data-type="shading">
+                        <div class="brush-icon"><i class="fas fa-cloud"></i></div>
+                        <div class="brush-name">Shading</div>
+                    </button>
+                    <button class="brush-btn" id="brush-spray" data-type="spray">
+                        <div class="brush-icon"><i class="fas fa-spray-can"></i></div>
+                        <div class="brush-name">Spray</div>
+                    </button>
+                    <button class="brush-btn" id="brush-eraser" data-type="eraser">
                         <div class="brush-icon"><i class="fas fa-eraser"></i></div>
-                        <div class="brush-name">Eraser</div>
+                        <div class="brush-name">Erase</div>
                     </button>
-                    <button class="brush-btn" data-type="fill">
-                        <div class="brush-icon"><i class="fas fa-fill"></i></div>
-                        <div class="brush-name">Fill</div>
+                    <button class="brush-btn" id="brush-calligraphy" data-type="calligraphy">
+                        <div class="brush-icon"><i class="fas fa-pen-nib"></i></div>
+                        <div class="brush-name">Calligraphy</div>
                     </button>
-                    <button class="brush-btn" data-type="line">
-                        <div class="brush-icon"><i class="fas fa-minus"></i></div>
-                        <div class="brush-name">Line</div>
-                    </button>
-                    <button class="brush-btn" data-type="rectangle">
-                        <div class="brush-icon"><i class="fas fa-square"></i></div>
-                        <div class="brush-name">Rect</div>
+                    <button class="brush-btn" id="brush-glitter" data-type="glitter">
+                        <div class="brush-icon"><i class="fas fa-sparkles"></i></div>
+                        <div class="brush-name">Glitter</div>
                     </button>
                 </div>
             </div>
@@ -622,7 +634,7 @@
             <div class="canvas-nav">
                 <div class="canvas-info">
                     <span>Brush: <span id="current-brush">Normal</span></span>
-                    <span>Size: <span id="current-size">5px</span></span>
+                    <span>Size: <span id="current-size">10px</span></span>
                     <span>Color: <span id="current-color">#6c5ce7</span></span>
                 </div>
                 <div class="canvas-actions">
@@ -727,12 +739,13 @@
         let lastX = 0;
         let lastY = 0;
         let currentColor = '#6c5ce7';
-        let brushSize = 5;
+        let brushSize = 10;
         let brushOpacity = 1;
         let currentTool = 'normal';
         let zoomLevel = 1;
         let undoStack = [];
         let redoStack = [];
+        let rainbowHue = 0;
         
         // Initialize canvas
         function initCanvas() {
@@ -861,12 +874,12 @@
             isDrawing = true;
             [lastX, lastY] = getCoordinates(e);
             
-            // For tools that need immediate drawing (like stamps)
-            if (currentTool === 'fill') {
-                floodFill(lastX, lastY);
-                isDrawing = false;
-            } else {
-                saveState();
+            // Save state before drawing
+            saveState();
+            
+            // Draw initial point for some brushes
+            if (currentTool === 'spray' || currentTool === 'glitter') {
+                drawPoint(lastX, lastY);
             }
         }
         
@@ -877,15 +890,36 @@
             
             const [x, y] = getCoordinates(e);
             
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.strokeStyle = currentColor;
-            ctx.globalAlpha = brushOpacity;
-            ctx.lineWidth = brushSize;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
+            switch(currentTool) {
+                case 'normal':
+                case 'calligraphy':
+                    drawLine(lastX, lastY, x, y);
+                    break;
+                case 'pixel':
+                    drawPixelLine(lastX, lastY, x, y);
+                    break;
+                case 'rainbow':
+                    drawRainbowLine(lastX, lastY, x, y);
+                    break;
+                case 'fur':
+                    drawFurLine(lastX, lastY, x, y);
+                    break;
+                case 'neon':
+                    drawNeonLine(lastX, lastY, x, y);
+                    break;
+                case 'shading':
+                    drawShadingLine(lastX, lastY, x, y);
+                    break;
+                case 'spray':
+                    drawSpray(x, y);
+                    break;
+                case 'eraser':
+                    drawEraserLine(lastX, lastY, x, y);
+                    break;
+                case 'glitter':
+                    drawGlitter(x, y);
+                    break;
+            }
             
             [lastX, lastY] = [x, y];
         }
@@ -900,6 +934,225 @@
             const y = (e.clientY - rect.top);
             
             return [x, y];
+        }
+        
+        // Brush drawing functions
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = currentColor;
+            ctx.globalAlpha = brushOpacity;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (currentTool === 'calligraphy') {
+                // Calligraphy brush with varying width
+                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                gradient.addColorStop(0, currentColor);
+                gradient.addColorStop(1, adjustColor(currentColor, -30));
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = brushSize * 1.5;
+            }
+            
+            ctx.stroke();
+        }
+        
+        function drawPixelLine(x1, y1, x2, y2) {
+            // Draw pixelated line
+            const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = Math.round(x1 + (x2 - x1) * t);
+                const y = Math.round(y1 + (y2 - y1) * t);
+                
+                ctx.fillStyle = currentColor;
+                ctx.globalAlpha = brushOpacity;
+                ctx.fillRect(x - brushSize/2, y - brushSize/2, brushSize, brushSize);
+            }
+        }
+        
+        function drawRainbowLine(x1, y1, x2, y2) {
+            // Rainbow brush that cycles through colors
+            rainbowHue = (rainbowHue + 2) % 360;
+            const rainbowColor = `hsl(${rainbowHue}, 100%, 50%)`;
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = rainbowColor;
+            ctx.globalAlpha = brushOpacity;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+        
+        function drawFurLine(x1, y1, x2, y2) {
+            // Fur brush with multiple hair-like strokes
+            const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = x1 + (x2 - x1) * t;
+                const y = y1 + (y2 - y1) * t;
+                
+                // Draw multiple hair-like strokes
+                for (let j = 0; j < 3; j++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const length = brushSize * 0.5 + Math.random() * brushSize;
+                    const endX = x + Math.cos(angle) * length;
+                    const endY = y + Math.sin(angle) * length;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = currentColor;
+                    ctx.globalAlpha = brushOpacity * 0.7;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        function drawNeonLine(x1, y1, x2, y2) {
+            // Neon brush with glow effect
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            // Outer glow
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = currentColor;
+            ctx.strokeStyle = currentColor;
+            ctx.globalAlpha = brushOpacity * 0.7;
+            ctx.lineWidth = brushSize + 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            // Inner line
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = lightenColor(currentColor, 40);
+            ctx.globalAlpha = brushOpacity;
+            ctx.lineWidth = brushSize;
+            ctx.stroke();
+        }
+        
+        function drawShadingLine(x1, y1, x2, y2) {
+            // Shading brush with soft edges
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            // Create gradient for soft edges
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            gradient.addColorStop(0, currentColor);
+            gradient.addColorStop(0.5, adjustColor(currentColor, -20));
+            gradient.addColorStop(1, currentColor);
+            
+            ctx.strokeStyle = gradient;
+            ctx.globalAlpha = brushOpacity * 0.8;
+            ctx.lineWidth = brushSize * 1.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+        
+        function drawSpray(x, y) {
+            // Spray paint effect
+            const density = brushSize * 2;
+            for (let i = 0; i < density; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * brushSize;
+                const sprayX = x + Math.cos(angle) * radius;
+                const sprayY = y + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = currentColor;
+                ctx.globalAlpha = brushOpacity * 0.3;
+                ctx.fillRect(sprayX, sprayY, 1, 1);
+            }
+        }
+        
+        function drawEraserLine(x1, y1, x2, y2) {
+            // Eraser tool
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = '#ffffff';
+            ctx.globalAlpha = 1;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+        
+        function drawGlitter(x, y) {
+            // Glitter effect with random sparkles
+            const density = brushSize;
+            for (let i = 0; i < density; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * brushSize;
+                const glitterX = x + Math.cos(angle) * radius;
+                const glitterY = y + Math.sin(angle) * radius;
+                
+                // Random glitter color (lighter version of current color)
+                const glitterColor = lightenColor(currentColor, Math.random() * 50);
+                
+                ctx.fillStyle = glitterColor;
+                ctx.globalAlpha = brushOpacity * 0.8;
+                ctx.fillRect(glitterX, glitterY, 2, 2);
+            }
+        }
+        
+        function drawPoint(x, y) {
+            // Draw a single point (used for spray and glitter on mousedown)
+            if (currentTool === 'spray') {
+                drawSpray(x, y);
+            } else if (currentTool === 'glitter') {
+                drawGlitter(x, y);
+            }
+        }
+        
+        // Color utility functions
+        function adjustColor(color, amount) {
+            // Adjust color brightness
+            let usePound = false;
+            if (color[0] === "#") {
+                color = color.slice(1);
+                usePound = true;
+            }
+            
+            const num = parseInt(color, 16);
+            let r = (num >> 16) + amount;
+            if (r > 255) r = 255;
+            else if (r < 0) r = 0;
+            
+            let b = ((num >> 8) & 0x00FF) + amount;
+            if (b > 255) b = 255;
+            else if (b < 0) b = 0;
+            
+            let g = (num & 0x0000FF) + amount;
+            if (g > 255) g = 255;
+            else if (g < 0) g = 0;
+            
+            return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+        }
+        
+        function lightenColor(color, percent) {
+            // Lighten a color by a percentage
+            const num = parseInt(color.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            
+            return "#" + (
+                0x1000000 +
+                (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+                (B < 255 ? (B < 1 ? 0 : B) : 255)
+            ).toString(16).slice(1);
         }
         
         // Canvas controls
@@ -962,79 +1215,6 @@
         
         function updateCanvasTransform() {
             canvas.style.transform = `scale(${zoomLevel})`;
-        }
-        
-        // Tool-specific functions
-        function floodFill(startX, startY) {
-            // Get the color at the starting point
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const targetColor = getPixel(imageData, startX, startY);
-            const fillColor = hexToRgb(currentColor);
-            
-            // If we're trying to fill with the same color, do nothing
-            if (colorsMatch(targetColor, fillColor)) return;
-            
-            // Perform flood fill
-            const pixelsToCheck = [{x: Math.floor(startX), y: Math.floor(startY)}];
-            
-            while (pixelsToCheck.length > 0) {
-                const pixel = pixelsToCheck.pop();
-                const {x, y} = pixel;
-                
-                // If this pixel is out of bounds, skip it
-                if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
-                
-                // If this pixel doesn't match the target color, skip it
-                if (!colorsMatch(getPixel(imageData, x, y), targetColor)) continue;
-                
-                // Set the pixel to the fill color
-                setPixel(imageData, x, y, fillColor);
-                
-                // Add neighboring pixels to check
-                pixelsToCheck.push({x: x + 1, y});
-                pixelsToCheck.push({x: x - 1, y});
-                pixelsToCheck.push({x, y: y + 1});
-                pixelsToCheck.push({x, y: y - 1});
-            }
-            
-            // Put the modified image data back to the canvas
-            ctx.putImageData(imageData, 0, 0);
-            saveState();
-            showNotification('Fill applied');
-        }
-        
-        function getPixel(imageData, x, y) {
-            const index = (Math.floor(y) * imageData.width + Math.floor(x)) * 4;
-            return {
-                r: imageData.data[index],
-                g: imageData.data[index + 1],
-                b: imageData.data[index + 2],
-                a: imageData.data[index + 3]
-            };
-        }
-        
-        function setPixel(imageData, x, y, color) {
-            const index = (Math.floor(y) * imageData.width + Math.floor(x)) * 4;
-            imageData.data[index] = color.r;
-            imageData.data[index + 1] = color.g;
-            imageData.data[index + 2] = color.b;
-            imageData.data[index + 3] = color.a !== undefined ? color.a : 255;
-        }
-        
-        function colorsMatch(color1, color2) {
-            return color1.r === color2.r && 
-                   color1.g === color2.g && 
-                   color1.b === color2.b && 
-                   color1.a === color2.a;
-        }
-        
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : {r: 0, g: 0, b: 0};
         }
         
         // Modal functions
