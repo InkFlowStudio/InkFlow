@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkFlow Studio | Digital Drawing Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --secondary: #fd79a8;
+            --dark: #2d3436;
+            --darker: #1e272e;
+            --light: #f5f6fa;
+            --gray: #a4b0be;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e84393;
+        }
+
+        body {
+            background-color: var(--darker);
+            color: var(--light);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--dark);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: rgba(108, 92, 231, 0.2);
+            color: var(--primary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e84393;
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+        }
+
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tool-group h3 {
+            font-size: 1rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-group h3 i {
+            color: var(--primary);
+        }
+
+        .color-picker {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #color-picker {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .preset-colors {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .preset-color {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .preset-color.active, .preset-color:hover {
+            transform: scale(1.1);
+            border-color: white;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-container i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        .slider-container input {
+            flex: 1;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .brush-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .brush-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 5px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .brush-btn.active, .brush-btn:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .brush-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .brush-name {
+            font-size: 0.7rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 0.8rem;
+            padding: 8px 5px;
+        }
+
+        .hotkey-hint {
+            font-size: 0.7rem;
+            color: var(--gray);
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background-color: var(--dark);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #drawing-canvas {
+            display: block;
+            background-color: white;
+            cursor: crosshair;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(45, 52, 54, 0.8);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: white;
+        }
+
+        .zoom-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .zoom-display {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .canvas-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-info {
+            display: flex;
+            gap: 15px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--dark);
+            border-radius: 10px;
+            padding: 25px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--light);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            
+            .brush-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-out;
+            display: none;
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        .notification.warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-paint-brush"></i>
+            <h1>InkFlow Studio</h1>
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn active"><i class="fas fa-draw-polygon"></i> Canvas</button>
+            <button class="nav-btn"><i class="fas fa-palette"></i> Gallery</button>
+            <button class="nav-btn"><i class="fas fa-cog"></i> Settings</button>
+        </div>
+        <div class="user-actions">
+            <button class="btn btn-outline" id="login-btn">Login</button>
+            <button class="btn btn-primary" id="register-btn">Sign Up</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="tool-group">
+                <h3><i class="fas fa-fill-drip"></i> Color</h3>
+                <div class="color-picker">
+                    <input type="color" id="color-picker" value="#6c5ce7">
+                    <div class="preset-colors">
+                        <div class="preset-color active" style="background-color: #6c5ce7;" data-color="#6c5ce7"></div>
+                        <div class="preset-color" style="background-color: #fd79a8;" data-color="#fd79a8"></div>
+                        <div class="preset-color" style="background-color: #00b894;" data-color="#00b894"></div>
+                        <div class="preset-color" style="background-color: #fdcb6e;" data-color="#fdcb6e"></div>
+                        <div class="preset-color" style="background-color: #e17055;" data-color="#e17055"></div>
+                        <div class="preset-color" style="background-color: #0984e3;" data-color="#0984e3"></div>
+                        <div class="preset-color" style="background-color: #a29bfe;" data-color="#a29bfe"></div>
+                        <div class="preset-color" style="background-color: #2d3436;" data-color="#2d3436"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-sliders-h"></i> Brush</h3>
+                <div class="slider-container">
+                    <i class="fas fa-ruler-combined"></i>
+                    <input type="range" id="brush-size" min="1" max="50" value="5">
+                    <span class="slider-value" id="brush-size-value">5px</span>
+                </div>
+                <div class="slider-container">
+                    <i class="fas fa-adjust"></i>
+                    <input type="range" id="brush-opacity" min="1" max="100" value="100">
+                    <span class="slider-value" id="opacity-value">100%</span>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-paint-brush"></i> Tools</h3>
+                <div class="brush-types">
+                    <button class="brush-btn active" data-type="normal">
+                        <div class="brush-icon"><i class="fas fa-paint-brush"></i></div>
+                        <div class="brush-name">Brush</div>
+                    </button>
+                    <button class="brush-btn" data-type="pencil">
+                        <div class="brush-icon"><i class="fas fa-pencil-alt"></i></div>
+                        <div class="brush-name">Pencil</div>
+                    </button>
+                    <button class="brush-btn" data-type="eraser">
+                        <div class="brush-icon"><i class="fas fa-eraser"></i></div>
+                        <div class="brush-name">Eraser</div>
+                    </button>
+                    <button class="brush-btn" data-type="fill">
+                        <div class="brush-icon"><i class="fas fa-fill"></i></div>
+                        <div class="brush-name">Fill</div>
+                    </button>
+                    <button class="brush-btn" data-type="line">
+                        <div class="brush-icon"><i class="fas fa-minus"></i></div>
+                        <div class="brush-name">Line</div>
+                    </button>
+                    <button class="brush-btn" data-type="rectangle">
+                        <div class="brush-icon"><i class="fas fa-square"></i></div>
+                        <div class="brush-name">Rect</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-sliders-h"></i> Controls</h3>
+                <div class="controls">
+                    <button class="btn btn-outline" id="clear-btn"><i class="fas fa-broom"></i> Clear</button>
+                    <button class="btn btn-outline" id="undo-btn"><i class="fas fa-undo"></i> Undo</button>
+                    <button class="btn btn-outline" id="redo-btn"><i class="fas fa-redo"></i> Redo</button>
+                </div>
+                <div class="hotkey-hint">Undo: Ctrl+Z | Clear: Ctrl+Del</div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Export</h3>
+                <div class="controls">
+                    <button class="btn btn-primary" id="save-btn"><i class="fas fa-save"></i> Save</button>
+                    <button class="btn btn-secondary" id="download-btn"><i class="fas fa-download"></i> Export</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-area">
+            <div class="canvas-header">
+                <h2>Untitled Project</h2>
+                <div class="canvas-actions">
+                    <button class="btn btn-outline" id="new-project-btn"><i class="fas fa-plus"></i> New Project</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="drawing-canvas"></canvas>
+                <div class="zoom-controls">
+                    <div class="zoom-btn" id="zoom-in"><i class="fas fa-plus"></i></div>
+                    <div class="zoom-display" id="zoom-display">100%</div>
+                    <div class="zoom-btn" id="zoom-out"><i class="fas fa-minus"></i></div>
+                    <div class="zoom-btn" id="reset-view"><i class="fas fa-sync"></i></div>
+                </div>
+            </div>
+            <div class="canvas-nav">
+                <div class="canvas-info">
+                    <span>Brush: <span id="current-brush">Normal</span></span>
+                    <span>Size: <span id="current-size">5px</span></span>
+                    <span>Color: <span id="current-color">#6c5ce7</span></span>
+                </div>
+                <div class="canvas-actions">
+                    <button class="btn btn-outline" id="grid-toggle"><i class="fas fa-th"></i> Grid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div class="modal" id="download-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-download"></i> Export Artwork</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="filename">File Name</label>
+                    <input type="text" id="filename" class="form-control" value="inkflow-artwork">
+                </div>
+                <div class="form-group">
+                    <label for="file-format">Format</label>
+                    <select id="file-format" class="form-control">
+                        <option value="png">PNG (Recommended)</option>
+                        <option value="jpg">JPG</option>
+                        <option value="webp">WebP</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-download">Cancel</button>
+                <button class="btn btn-primary" id="confirm-download">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal" id="save-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-save"></i> Save Project</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" class="form-control" value="Untitled Project">
+                </div>
+                <div class="form-group">
+                    <label for="project-description">Description (Optional)</label>
+                    <textarea id="project-description" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-save">Cancel</button>
+                <button class="btn btn-primary" id="confirm-save">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Welcome to InkFlow</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" style="color: var(--primary); text-decoration: none;">Forgot password?</a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-login">Cancel</button>
+                <button class="btn btn-primary" id="confirm-login">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Operation completed successfully!</span>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // App state
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = '#6c5ce7';
+        let brushSize = 5;
+        let brushOpacity = 1;
+        let currentTool = 'normal';
+        let zoomLevel = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let undoStack = [];
+        let redoStack = [];
+        
+        // Initialize canvas
+        function initCanvas() {
+            // Set canvas size
+            resizeCanvas();
+            
+            // Set initial canvas background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Save initial state
+            saveState();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Update UI
+            updateBrushInfo();
+        }
+        
+        // Resize canvas to fit container
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            // Color picker
+            document.getElementById('color-picker').addEventListener('input', (e) => {
+                currentColor = e.target.value;
+                updateBrushInfo();
+                updateActivePresetColor();
+            });
+            
+            // Brush size
+            document.getElementById('brush-size').addEventListener('input', (e) => {
+                brushSize = parseInt(e.target.value);
+                document.getElementById('brush-size-value').textContent = `${brushSize}px`;
+                updateBrushInfo();
+            });
+            
+            // Brush opacity
+            document.getElementById('brush-opacity').addEventListener('input', (e) => {
+                brushOpacity = parseInt(e.target.value) / 100;
+                document.getElementById('opacity-value').textContent = `${e.target.value}%`;
+            });
+            
+            // Brush tools
+            document.querySelectorAll('.brush-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTool = btn.dataset.type;
+                    updateBrushInfo();
+                });
+            });
+            
+            // Preset colors
+            document.querySelectorAll('.preset-color').forEach(color => {
+                color.addEventListener('click', (e) => {
+                    document.querySelectorAll('.preset-color').forEach(c => c.classList.remove('active'));
+                    color.classList.add('active');
+                    currentColor = color.dataset.color;
+                    document.getElementById('color-picker').value = currentColor;
+                    updateBrushInfo();
+                });
+            });
+            
+            // Control buttons
+            document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+            document.getElementById('undo-btn').addEventListener('click', undo);
+            document.getElementById('redo-btn').addEventListener('click', redo);
+            document.getElementById('download-btn').addEventListener('click', showDownloadModal);
+            document.getElementById('save-btn').addEventListener('click', showSaveModal);
+            document.getElementById('new-project-btn').addEventListener('click', newProject);
+            document.getElementById('grid-toggle').addEventListener('click', toggleGrid);
+            
+            // Zoom controls
+            document.getElementById('zoom-in').addEventListener('click', () => zoom(0.1));
+            document.getElementById('zoom-out').addEventListener('click', () => zoom(-0.1));
+            document.getElementById('reset-view').addEventListener('click', resetView);
+            
+            // Modal events
+            setupModalEvents();
+            
+            // Auth buttons
+            document.getElementById('login-btn').addEventListener('click', () => showModal('login-modal'));
+            document.getElementById('register-btn').addEventListener('click', () => showModal('login-modal'));
+            
+            // Window resize
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+        
+        // Set up modal event listeners
+        function setupModalEvents() {
+            // Download modal
+            document.getElementById('confirm-download').addEventListener('click', downloadCanvas);
+            document.getElementById('cancel-download').addEventListener('click', () => hideModal('download-modal'));
+            
+            // Save modal
+            document.getElementById('confirm-save').addEventListener('click', saveProject);
+            document.getElementById('cancel-save').addEventListener('click', () => hideModal('save-modal'));
+            
+            // Login modal
+            document.getElementById('confirm-login').addEventListener('click', login);
+            document.getElementById('cancel-login').addEventListener('click', () => hideModal('login-modal'));
+            
+            // Close buttons
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modal = btn.closest('.modal');
+                    hideModal(modal.id);
+                });
+            });
+            
+            // Close modal when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        hideModal(modal.id);
+                    }
+                });
+            });
+        }
+        
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getCoordinates(e);
+            
+            // For tools that need immediate drawing (like stamps)
+            if (currentTool === 'fill') {
+                floodFill(lastX, lastY);
+                isDrawing = false;
+            } else {
+                saveState();
+            }
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            e.preventDefault();
+            
+            const [x, y] = getCoordinates(e);
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = currentColor;
+            ctx.globalAlpha = brushOpacity;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            [lastX, lastY] = [x, y];
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        function getCoordinates(e) {
+            let clientX, clientY;
+            
+            if (e.type.includes('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left - offsetX) / zoomLevel;
+            const y = (clientY - rect.top - offsetY) / zoomLevel;
+            
+            return [x, y];
+        }
+        
+        // Touch event handlers
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        // Canvas controls
+        function clearCanvas() {
+            if (confirm('Are you sure you want to clear the canvas?')) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState();
+                showNotification('Canvas cleared');
+            }
+        }
+        
+        function saveState() {
+            undoStack.push(canvas.toDataURL());
+            if (undoStack.length > 50) {
+                undoStack.shift();
+            }
+            redoStack = [];
+        }
+        
+        function undo() {
+            if (undoStack.length > 1) {
+                redoStack.push(undoStack.pop());
+                const img = new Image();
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = undoStack[undoStack.length - 1];
+                showNotification('Undo completed');
+            }
+        }
+        
+        function redo() {
+            if (redoStack.length > 0) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = redoStack.pop();
+                undoStack.push(img.src);
+                showNotification('Redo completed');
+            }
+        }
+        
+        // Zoom and pan functions
+        function zoom(delta) {
+            zoomLevel += delta;
+            zoomLevel = Math.max(0.1, Math.min(5, zoomLevel));
+            updateCanvasTransform();
+            document.getElementById('zoom-display').textContent = `${Math.round(zoomLevel * 100)}%`;
+        }
+        
+        function resetView() {
+            zoomLevel = 1;
+            offsetX = 0;
+            offsetY = 0;
+            updateCanvasTransform();
+            document.getElementById('zoom-display').textContent = '100%';
+        }
+        
+        function updateCanvasTransform() {
+            canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoomLevel})`;
+        }
+        
+        // Tool-specific functions
+        function floodFill(startX, startY) {
+            // Get the color at the starting point
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const targetColor = getPixel(imageData, startX, startY);
+            const fillColor = hexToRgb(currentColor);
+            
+            // If we're trying to fill with the same color, do nothing
+            if (colorsMatch(targetColor, fillColor)) return;
+            
+            // Perform flood fill
+            const pixelsToCheck = [{x: Math.floor(startX), y: Math.floor(startY)}];
+            
+            while (pixelsToCheck.length > 0) {
+                const pixel = pixelsToCheck.pop();
+                const {x, y} = pixel;
+                
+                // If this pixel is out of bounds, skip it
+                if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
+                
+                // If this pixel doesn't match the target color, skip it
+                if (!colorsMatch(getPixel(imageData, x, y), targetColor)) continue;
+                
+                // Set the pixel to the fill color
+                setPixel(imageData, x, y, fillColor);
+                
+                // Add neighboring pixels to check
+                pixelsToCheck.push({x: x + 1, y});
+                pixelsToCheck.push({x: x - 1, y});
+                pixelsToCheck.push({x, y: y + 1});
+                pixelsToCheck.push({x, y: y - 1});
+            }
+            
+            // Put the modified image data back to the canvas
+            ctx.putImageData(imageData, 0, 0);
+            saveState();
+            showNotification('Fill applied');
+        }
+        
+        function getPixel(imageData, x, y) {
+            const index = (Math.floor(y) * imageData.width + Math.floor(x)) * 4;
+            return {
+                r: imageData.data[index],
+                g: imageData.data[index + 1],
+                b: imageData.data[index + 2],
+                a: imageData.data[index + 3]
+            };
+        }
+        
+        function setPixel(imageData, x, y, color) {
+            const index = (Math.floor(y) * imageData.width + Math.floor(x)) * 4;
+            imageData.data[index] = color.r;
+            imageData.data[index + 1] = color.g;
+            imageData.data[index + 2] = color.b;
+            imageData.data[index + 3] = color.a !== undefined ? color.a : 255;
+        }
+        
+        function colorsMatch(color1, color2) {
+            return color1.r === color2.r && 
+                   color1.g === color2.g && 
+                   color1.b === color2.b && 
+                   color1.a === color2.a;
+        }
+        
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : {r: 0, g: 0, b: 0};
+        }
+        
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function showDownloadModal() {
+            showModal('download-modal');
+        }
+        
+        function downloadCanvas() {
+            const filename = document.getElementById('filename').value || 'inkflow-artwork';
+            const format = document.getElementById('file-format').value;
+            
+            const link = document.createElement('a');
+            link.download = `${filename}.${format}`;
+            link.href = canvas.toDataURL(`image/${format}`);
+            link.click();
+            
+            hideModal('download-modal');
+            showNotification('Artwork downloaded successfully!');
+        }
+        
+        function showSaveModal() {
+            showModal('save-modal');
+        }
+        
+        function saveProject() {
+            const projectName = document.getElementById('project-name').value;
+            
+            // In a real app, you would save to a database or local storage
+            // For now, we'll just show a notification
+            hideModal('save-modal');
+            showNotification(`Project "${projectName}" saved successfully!`);
+        }
+        
+        function newProject() {
+            if (confirm('Start a new project? Any unsaved changes will be lost.')) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState();
+                showNotification('New project created');
+            }
+        }
+        
+        function toggleGrid() {
+            // This would toggle a grid overlay in a real implementation
+            showNotification('Grid toggled');
+        }
+        
+        function login() {
+            const email = document.getElementById('login-email').value;
+            
+            if (!email) {
+                showNotification('Please enter your email', 'error');
+                return;
+            }
+            
+            // In a real app, you would authenticate with a server
+            hideModal('login-modal');
+            showNotification(`Welcome back! Signed in as ${email}`);
+            
+            // Update UI for logged in state
+            document.getElementById('login-btn').textContent = 'My Account';
+            document.getElementById('register-btn').style.display = 'none';
+        }
+        
+        // UI update functions
+        function updateBrushInfo() {
+            document.getElementById('current-brush').textContent = currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
+            document.getElementById('current-size').textContent = `${brushSize}px`;
+            document.getElementById('current-color').textContent = currentColor;
+        }
+        
+        function updateActivePresetColor() {
+            document.querySelectorAll('.preset-color').forEach(color => {
+                if (color.dataset.color === currentColor) {
+                    color.classList.add('active');
+                } else {
+                    color.classList.remove('active');
+                }
+            });
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notification-text');
+            
+            text.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Keyboard shortcuts
+        function handleKeyboardShortcuts(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'z':
+                        e.preventDefault();
+                        undo();
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redo();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        showSaveModal();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        showDownloadModal();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Delete' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                clearCanvas();
+            }
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('load', initCanvas);
+    </script>
+</body>
+</html>
