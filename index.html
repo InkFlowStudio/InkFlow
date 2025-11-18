@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InkFlow Studio | Advanced Pixel Art</title>
+    <title>InkFlow Studio | Advanced Digital Art Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Reset & Base Styles */
@@ -143,7 +143,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 300px;
+            width: 320px;
             background-color: var(--dark);
             padding: 20px;
             display: flex;
@@ -446,9 +446,11 @@
             background-color: var(--dark);
             border-radius: 10px;
             padding: 25px;
-            width: 400px;
+            width: 450px;
             max-width: 90%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -539,6 +541,54 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Advanced Tools Panel */
+        .advanced-tools {
+            background-color: var(--dark);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .tool-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .tool-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .tool-label {
+            font-size: 0.9rem;
+        }
+
+        .tool-select {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: var(--light);
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Color History */
+        .color-history {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .history-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
@@ -599,6 +649,9 @@
                     <input type="range" id="brush-opacity" min="1" max="100" value="100">
                     <span class="slider-value" id="opacity-value">100%</span>
                 </div>
+                <div class="color-history" id="color-history">
+                    <!-- Color history will be populated here -->
+                </div>
             </div>
 
             <div class="tool-group">
@@ -607,6 +660,16 @@
                     <i class="fas fa-ruler-combined"></i>
                     <input type="range" id="brush-size" min="1" max="40" value="10">
                     <span class="slider-value" id="brush-size-value">10px</span>
+                </div>
+                <div class="slider-container">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <input type="range" id="brush-flow" min="1" max="100" value="100">
+                    <span class="slider-value" id="brush-flow-value">100%</span>
+                </div>
+                <div class="slider-container">
+                    <i class="fas fa-feather"></i>
+                    <input type="range" id="brush-hardness" min="1" max="100" value="100">
+                    <span class="slider-value" id="brush-hardness-value">100%</span>
                 </div>
             </div>
 
@@ -653,6 +716,14 @@
                         <div class="brush-icon"><i class="fas fa-sparkles"></i></div>
                         <div class="brush-name">Glitter</div>
                     </button>
+                    <button class="brush-btn" id="brush-watercolor" data-type="watercolor">
+                        <div class="brush-icon"><i class="fas fa-tint"></i></div>
+                        <div class="brush-name">Watercolor</div>
+                    </button>
+                    <button class="brush-btn" id="brush-oil" data-type="oil">
+                        <div class="brush-icon"><i class="fas fa-paint-roller"></i></div>
+                        <div class="brush-name">Oil</div>
+                    </button>
                 </div>
             </div>
 
@@ -663,7 +734,7 @@
                     <button class="btn btn-outline" id="undo-btn"><i class="fas fa-undo"></i> Undo</button>
                     <button class="btn btn-outline" id="redo-btn"><i class="fas fa-redo"></i> Redo</button>
                 </div>
-                <div class="hotkey-hint">Undo: Ctrl+Z | Clear: Ctrl+Del</div>
+                <div class="hotkey-hint">Undo: Ctrl+Z | Clear: Ctrl+Del | Save: Ctrl+S</div>
             </div>
 
             <div class="tool-group">
@@ -671,6 +742,7 @@
                 <div class="controls">
                     <button class="btn btn-primary" id="save-btn"><i class="fas fa-save"></i> Save</button>
                     <button class="btn btn-secondary" id="download-btn"><i class="fas fa-download"></i> Export</button>
+                    <button class="btn btn-outline" id="print-btn"><i class="fas fa-print"></i> Print</button>
                 </div>
             </div>
 
@@ -682,6 +754,7 @@
                 <div class="controls">
                     <button class="btn btn-outline" id="add-layer-btn"><i class="fas fa-plus"></i> Add Layer</button>
                     <button class="btn btn-outline" id="delete-layer-btn"><i class="fas fa-trash"></i> Delete</button>
+                    <button class="btn btn-outline" id="merge-layers-btn"><i class="fas fa-object-group"></i> Merge</button>
                 </div>
             </div>
 
@@ -690,6 +763,50 @@
                 <div class="controls">
                     <button class="btn btn-outline" id="new-project-btn"><i class="fas fa-plus"></i> New Project</button>
                     <button class="btn btn-outline" id="grid-toggle"><i class="fas fa-th"></i> Grid</button>
+                    <button class="btn btn-outline" id="ruler-toggle"><i class="fas fa-ruler"></i> Ruler</button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-magic"></i> Advanced Tools</h3>
+                <div class="advanced-tools">
+                    <div class="tool-option">
+                        <span class="tool-label">Symmetry</span>
+                        <select id="symmetry-mode" class="tool-select">
+                            <option value="none">None</option>
+                            <option value="vertical">Vertical</option>
+                            <option value="horizontal">Horizontal</option>
+                            <option value="radial">Radial</option>
+                        </select>
+                    </div>
+                    <div class="tool-option">
+                        <span class="tool-label">Blending Mode</span>
+                        <select id="blend-mode" class="tool-select">
+                            <option value="source-over">Normal</option>
+                            <option value="multiply">Multiply</option>
+                            <option value="screen">Screen</option>
+                            <option value="overlay">Overlay</option>
+                            <option value="darken">Darken</option>
+                            <option value="lighten">Lighten</option>
+                            <option value="color-dodge">Color Dodge</option>
+                            <option value="color-burn">Color Burn</option>
+                        </select>
+                    </div>
+                    <div class="tool-option">
+                        <span class="tool-label">Pressure Sensitivity</span>
+                        <input type="checkbox" id="pressure-toggle" checked>
+                    </div>
+                    <div class="tool-option">
+                        <span class="tool-label">Smoothing</span>
+                        <input type="range" id="smoothing-level" min="0" max="10" value="5">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3><i class="fas fa-eye-dropper"></i> Color Picker</h3>
+                <div class="controls">
+                    <button class="btn btn-outline" id="eyedropper-btn"><i class="fas fa-eye-dropper"></i> Pick Color</button>
                 </div>
             </div>
         </div>
@@ -700,11 +817,13 @@
                 <h2 id="project-title">Untitled Project</h2>
                 <div class="canvas-actions">
                     <button class="btn btn-outline" id="project-settings-btn"><i class="fas fa-cog"></i> Project Settings</button>
+                    <button class="btn btn-outline" id="reference-image-btn"><i class="fas fa-image"></i> Reference</button>
                 </div>
             </div>
             <div class="canvas-container">
                 <canvas id="drawing-canvas" width="800" height="600"></canvas>
                 <canvas id="grid-overlay" class="grid-overlay" width="800" height="600"></canvas>
+                <canvas id="ruler-overlay" class="grid-overlay" width="800" height="600"></canvas>
                 <div class="zoom-controls">
                     <div class="zoom-btn" id="zoom-in"><i class="fas fa-plus"></i></div>
                     <div class="zoom-display" id="zoom-display">100%</div>
@@ -721,11 +840,13 @@
                 </div>
                 <div class="canvas-actions">
                     <button class="btn btn-outline" id="toggle-grid-btn"><i class="fas fa-th"></i> Toggle Grid</button>
+                    <button class="btn btn-outline" id="fullscreen-btn"><i class="fas fa-expand"></i> Fullscreen</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- All modals from previous implementation remain -->
     <!-- Download Modal -->
     <div class="modal" id="download-modal">
         <div class="modal-content">
@@ -744,6 +865,23 @@
                         <option value="png">PNG (Recommended)</option>
                         <option value="jpg">JPG</option>
                         <option value="webp">WebP</option>
+                        <option value="svg">SVG</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="export-quality">Quality</label>
+                    <select id="export-quality" class="form-control">
+                        <option value="1">High (100%)</option>
+                        <option value="0.9">Medium (90%)</option>
+                        <option value="0.7">Low (70%)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="export-scale">Scale</label>
+                    <select id="export-scale" class="form-control">
+                        <option value="1">100% (Original)</option>
+                        <option value="2">200%</option>
+                        <option value="0.5">50%</option>
                     </select>
                 </div>
             </div>
@@ -769,6 +907,18 @@
                 <div class="form-group">
                     <label for="project-description">Description (Optional)</label>
                     <textarea id="project-description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="project-tags">Tags</label>
+                    <input type="text" id="project-tags" class="form-control" placeholder="art, digital, painting">
+                </div>
+                <div class="form-group">
+                    <label for="project-visibility">Visibility</label>
+                    <select id="project-visibility" class="form-control">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                        <option value="unlisted">Unlisted</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -861,10 +1011,49 @@
                     <label for="canvas-background">Background Color</label>
                     <input type="color" id="canvas-background" class="form-control" value="#ffffff">
                 </div>
+                <div class="form-group">
+                    <label for="canvas-dpi">DPI (Resolution)</label>
+                    <select id="canvas-dpi" class="form-control">
+                        <option value="72">72 DPI (Web)</option>
+                        <option value="150">150 DPI (Print)</option>
+                        <option value="300" selected>300 DPI (High Quality)</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-new-project">Cancel</button>
                 <button class="btn btn-primary" id="confirm-new-project">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Image Modal -->
+    <div class="modal" id="reference-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-image"></i> Reference Image</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="reference-upload">Upload Reference Image</label>
+                    <input type="file" id="reference-upload" class="form-control" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="reference-opacity">Opacity</label>
+                    <input type="range" id="reference-opacity" class="form-control" min="10" max="100" value="50">
+                </div>
+                <div class="form-group">
+                    <label for="reference-scale">Scale</label>
+                    <input type="range" id="reference-scale" class="form-control" min="10" max="200" value="100">
+                </div>
+                <div id="reference-preview" style="text-align: center; margin-top: 15px;">
+                    <p>No reference image loaded</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-reference">Cancel</button>
+                <button class="btn btn-primary" id="confirm-reference">Load Reference</button>
             </div>
         </div>
     </div>
@@ -881,6 +1070,8 @@
         const ctx = canvas.getContext('2d');
         const gridCanvas = document.getElementById('grid-overlay');
         const gridCtx = gridCanvas.getContext('2d');
+        const rulerCanvas = document.getElementById('ruler-overlay');
+        const rulerCtx = rulerCanvas.getContext('2d');
         
         // App state
         let isDrawing = false;
@@ -889,22 +1080,36 @@
         let currentColor = '#6c5ce7';
         let brushSize = 10;
         let brushOpacity = 1;
+        let brushFlow = 1;
+        let brushHardness = 1;
         let currentTool = 'normal';
         let zoomLevel = 1;
         let undoStack = [];
         let redoStack = [];
         let rainbowHue = 0;
         let isGridVisible = false;
+        let isRulerVisible = false;
+        let isFullscreen = false;
+        let isEyedropperActive = false;
+        let symmetryMode = 'none';
+        let blendMode = 'source-over';
+        let pressureSensitivity = true;
+        let smoothingLevel = 5;
         let layers = [];
         let currentLayerIndex = 0;
+        let colorHistory = [];
         let currentProject = {
             name: 'Untitled Project',
             width: 800,
             height: 600,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            dpi: 300
         };
         let users = JSON.parse(localStorage.getItem('inkflowUsers')) || [];
         let currentUser = null;
+        let referenceImage = null;
+        let referenceOpacity = 0.5;
+        let referenceScale = 1;
         
         // Initialize canvas
         function initCanvas() {
@@ -914,6 +1119,9 @@
             
             // Initialize layers
             initLayers();
+            
+            // Initialize color history
+            initColorHistory();
             
             // Save initial state
             saveState();
@@ -931,6 +1139,8 @@
             layers = [{
                 name: 'Layer 1',
                 visible: true,
+                opacity: 1,
+                blendMode: 'source-over',
                 canvas: document.createElement('canvas'),
                 ctx: null
             }];
@@ -945,18 +1155,84 @@
             updateLayersPanel();
         }
         
+        // Initialize color history
+        function initColorHistory() {
+            colorHistory = [
+                '#ff6b6b', '#4fc3f7', '#8a2be2', '#ffd166', 
+                '#06d6a0', '#ff9e6d', '#6c5ce7', '#fd79a8'
+            ];
+            updateColorHistory();
+        }
+        
+        // Update color history display
+        function updateColorHistory() {
+            const historyContainer = document.getElementById('color-history');
+            historyContainer.innerHTML = '';
+            
+            colorHistory.forEach(color => {
+                const colorEl = document.createElement('div');
+                colorEl.className = 'history-color';
+                colorEl.style.backgroundColor = color;
+                colorEl.title = color;
+                colorEl.addEventListener('click', () => {
+                    currentColor = color;
+                    document.getElementById('color-picker').value = color;
+                    updateBrushInfo();
+                    updateActivePresetColor();
+                });
+                historyContainer.appendChild(colorEl);
+            });
+        }
+        
+        // Add color to history
+        function addColorToHistory(color) {
+            // Remove if already exists
+            const index = colorHistory.indexOf(color);
+            if (index > -1) {
+                colorHistory.splice(index, 1);
+            }
+            
+            // Add to beginning
+            colorHistory.unshift(color);
+            
+            // Limit history size
+            if (colorHistory.length > 12) {
+                colorHistory.pop();
+            }
+            
+            updateColorHistory();
+        }
+        
         // Render all layers to main canvas
         function renderLayers() {
             // Clear main canvas
             ctx.fillStyle = currentProject.backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // Draw reference image if exists
+            if (referenceImage) {
+                ctx.globalAlpha = referenceOpacity;
+                ctx.drawImage(
+                    referenceImage, 
+                    0, 0, 
+                    referenceImage.width * referenceScale, 
+                    referenceImage.height * referenceScale
+                );
+                ctx.globalAlpha = 1;
+            }
+            
             // Draw all visible layers
             layers.forEach(layer => {
                 if (layer.visible) {
+                    ctx.globalAlpha = layer.opacity;
+                    ctx.globalCompositeOperation = layer.blendMode;
                     ctx.drawImage(layer.canvas, 0, 0);
                 }
             });
+            
+            // Reset composite operation
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1;
         }
         
         // Update layers panel UI
@@ -1039,6 +1315,8 @@
             const newLayer = {
                 name: `Layer ${layers.length + 1}`,
                 visible: true,
+                opacity: 1,
+                blendMode: 'source-over',
                 canvas: document.createElement('canvas'),
                 ctx: null
             };
@@ -1072,6 +1350,44 @@
             showNotification('Layer deleted');
         }
         
+        // Merge all visible layers
+        function mergeLayers() {
+            if (layers.length <= 1) {
+                showNotification('Only one layer exists', 'error');
+                return;
+            }
+            
+            // Create a new merged layer
+            const mergedLayer = {
+                name: 'Merged Layer',
+                visible: true,
+                opacity: 1,
+                blendMode: 'source-over',
+                canvas: document.createElement('canvas'),
+                ctx: null
+            };
+            
+            mergedLayer.canvas.width = canvas.width;
+            mergedLayer.canvas.height = canvas.height;
+            mergedLayer.ctx = mergedLayer.canvas.getContext('2d');
+            
+            // Draw all visible layers to the merged layer
+            layers.forEach(layer => {
+                if (layer.visible) {
+                    mergedLayer.ctx.globalAlpha = layer.opacity;
+                    mergedLayer.ctx.globalCompositeOperation = layer.blendMode;
+                    mergedLayer.ctx.drawImage(layer.canvas, 0, 0);
+                }
+            });
+            
+            // Reset and add the merged layer
+            layers = [mergedLayer];
+            currentLayerIndex = 0;
+            renderLayers();
+            updateLayersPanel();
+            showNotification('Layers merged');
+        }
+        
         // Set up all event listeners
         function setupEventListeners() {
             // Canvas events
@@ -1083,6 +1399,7 @@
             // Color picker
             document.getElementById('color-picker').addEventListener('input', (e) => {
                 currentColor = e.target.value;
+                addColorToHistory(currentColor);
                 updateBrushInfo();
                 updateActivePresetColor();
             });
@@ -1100,6 +1417,18 @@
                 document.getElementById('opacity-value').textContent = `${e.target.value}%`;
             });
             
+            // Brush flow
+            document.getElementById('brush-flow').addEventListener('input', (e) => {
+                brushFlow = parseInt(e.target.value) / 100;
+                document.getElementById('brush-flow-value').textContent = `${e.target.value}%`;
+            });
+            
+            // Brush hardness
+            document.getElementById('brush-hardness').addEventListener('input', (e) => {
+                brushHardness = parseInt(e.target.value) / 100;
+                document.getElementById('brush-hardness-value').textContent = `${e.target.value}%`;
+            });
+            
             // Brush tools
             document.querySelectorAll('.brush-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1107,6 +1436,9 @@
                     btn.classList.add('active');
                     currentTool = btn.dataset.type;
                     updateBrushInfo();
+                    
+                    // Special handling for eyedropper
+                    isEyedropperActive = (currentTool === 'eyedropper');
                 });
             });
             
@@ -1117,6 +1449,7 @@
                     color.classList.add('active');
                     currentColor = color.dataset.color;
                     document.getElementById('color-picker').value = currentColor;
+                    addColorToHistory(currentColor);
                     updateBrushInfo();
                 });
             });
@@ -1127,13 +1460,40 @@
             document.getElementById('redo-btn').addEventListener('click', redo);
             document.getElementById('download-btn').addEventListener('click', showDownloadModal);
             document.getElementById('save-btn').addEventListener('click', showSaveModal);
+            document.getElementById('print-btn').addEventListener('click', printCanvas);
             document.getElementById('new-project-btn').addEventListener('click', showNewProjectModal);
             document.getElementById('grid-toggle').addEventListener('click', toggleGrid);
+            document.getElementById('ruler-toggle').addEventListener('click', toggleRuler);
             document.getElementById('toggle-grid-btn').addEventListener('click', toggleGrid);
+            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+            document.getElementById('reference-image-btn').addEventListener('click', showReferenceModal);
             
             // Layer buttons
             document.getElementById('add-layer-btn').addEventListener('click', addLayer);
             document.getElementById('delete-layer-btn').addEventListener('click', deleteLayer);
+            document.getElementById('merge-layers-btn').addEventListener('click', mergeLayers);
+            
+            // Advanced tools
+            document.getElementById('symmetry-mode').addEventListener('change', (e) => {
+                symmetryMode = e.target.value;
+            });
+            
+            document.getElementById('blend-mode').addEventListener('change', (e) => {
+                blendMode = e.target.value;
+                layers[currentLayerIndex].blendMode = blendMode;
+                renderLayers();
+            });
+            
+            document.getElementById('pressure-toggle').addEventListener('change', (e) => {
+                pressureSensitivity = e.target.checked;
+            });
+            
+            document.getElementById('smoothing-level').addEventListener('input', (e) => {
+                smoothingLevel = parseInt(e.target.value);
+            });
+            
+            // Eyedropper tool
+            document.getElementById('eyedropper-btn').addEventListener('click', activateEyedropper);
             
             // Zoom controls
             document.getElementById('zoom-in').addEventListener('click', () => zoom(0.1));
@@ -1149,6 +1509,9 @@
             
             // Keyboard shortcuts
             document.addEventListener('keydown', handleKeyboardShortcuts);
+            
+            // Fullscreen change
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
         }
         
         // Set up modal event listeners
@@ -1173,6 +1536,19 @@
             document.getElementById('confirm-new-project').addEventListener('click', createNewProject);
             document.getElementById('cancel-new-project').addEventListener('click', () => hideModal('new-project-modal'));
             
+            // Reference image modal
+            document.getElementById('confirm-reference').addEventListener('click', loadReferenceImage);
+            document.getElementById('cancel-reference').addEventListener('click', () => hideModal('reference-modal'));
+            document.getElementById('reference-upload').addEventListener('change', previewReferenceImage);
+            document.getElementById('reference-opacity').addEventListener('input', (e) => {
+                referenceOpacity = parseInt(e.target.value) / 100;
+                renderLayers();
+            });
+            document.getElementById('reference-scale').addEventListener('input', (e) => {
+                referenceScale = parseInt(e.target.value) / 100;
+                renderLayers();
+            });
+            
             // Close buttons
             document.querySelectorAll('.close-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1193,6 +1569,11 @@
         
         // Drawing functions
         function startDrawing(e) {
+            if (isEyedropperActive) {
+                pickColor(e);
+                return;
+            }
+            
             isDrawing = true;
             [lastX, lastY] = getCoordinates(e);
             
@@ -1206,7 +1587,7 @@
         }
         
         function draw(e) {
-            if (!isDrawing) return;
+            if (!isDrawing || isEyedropperActive) return;
             
             e.preventDefault();
             
@@ -1244,6 +1625,17 @@
                 case 'glitter':
                     drawGlitter(layerCtx, x, y);
                     break;
+                case 'watercolor':
+                    drawWatercolorLine(layerCtx, lastX, lastY, x, y);
+                    break;
+                case 'oil':
+                    drawOilLine(layerCtx, lastX, lastY, x, y);
+                    break;
+            }
+            
+            // Apply symmetry if enabled
+            if (symmetryMode !== 'none') {
+                applySymmetry(layerCtx, lastX, lastY, x, y);
             }
             
             // Render layers to main canvas
@@ -1270,7 +1662,7 @@
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.strokeStyle = currentColor;
-            ctx.globalAlpha = brushOpacity;
+            ctx.globalAlpha = brushOpacity * brushFlow;
             ctx.lineWidth = brushSize;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1302,7 +1694,7 @@
                 y = Math.round(y / gridSize) * gridSize;
                 
                 ctx.fillStyle = currentColor;
-                ctx.globalAlpha = brushOpacity;
+                ctx.globalAlpha = brushOpacity * brushFlow;
                 ctx.fillRect(x - gridSize/2, y - gridSize/2, gridSize, gridSize);
             }
         }
@@ -1316,7 +1708,7 @@
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.strokeStyle = rainbowColor;
-            ctx.globalAlpha = brushOpacity;
+            ctx.globalAlpha = brushOpacity * brushFlow;
             ctx.lineWidth = brushSize;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1342,7 +1734,7 @@
                     ctx.moveTo(x, y);
                     ctx.lineTo(endX, endY);
                     ctx.strokeStyle = currentColor;
-                    ctx.globalAlpha = brushOpacity * 0.7;
+                    ctx.globalAlpha = brushOpacity * brushFlow * 0.7;
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 }
@@ -1359,7 +1751,7 @@
             ctx.shadowBlur = 15;
             ctx.shadowColor = currentColor;
             ctx.strokeStyle = currentColor;
-            ctx.globalAlpha = brushOpacity * 0.7;
+            ctx.globalAlpha = brushOpacity * brushFlow * 0.7;
             ctx.lineWidth = brushSize + 4;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1368,7 +1760,7 @@
             // Inner line
             ctx.shadowBlur = 0;
             ctx.strokeStyle = lightenColor(currentColor, 40);
-            ctx.globalAlpha = brushOpacity;
+            ctx.globalAlpha = brushOpacity * brushFlow;
             ctx.lineWidth = brushSize;
             ctx.stroke();
         }
@@ -1386,7 +1778,7 @@
             gradient.addColorStop(1, currentColor);
             
             ctx.strokeStyle = gradient;
-            ctx.globalAlpha = brushOpacity * 0.8;
+            ctx.globalAlpha = brushOpacity * brushFlow * 0.8;
             ctx.lineWidth = brushSize * 1.5;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1403,7 +1795,7 @@
                 const sprayY = y + Math.sin(angle) * radius;
                 
                 ctx.fillStyle = currentColor;
-                ctx.globalAlpha = brushOpacity * 0.3;
+                ctx.globalAlpha = brushOpacity * brushFlow * 0.3;
                 ctx.fillRect(sprayX, sprayY, 1, 1);
             }
         }
@@ -1415,7 +1807,7 @@
             ctx.lineTo(x2, y2);
             ctx.strokeStyle = 'rgba(0,0,0,0)'; // Transparent
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = brushFlow;
             ctx.lineWidth = brushSize;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1436,8 +1828,72 @@
                 const glitterColor = lightenColor(currentColor, Math.random() * 50);
                 
                 ctx.fillStyle = glitterColor;
-                ctx.globalAlpha = brushOpacity * 0.8;
+                ctx.globalAlpha = brushOpacity * brushFlow * 0.8;
                 ctx.fillRect(glitterX, glitterY, 2, 2);
+            }
+        }
+        
+        function drawWatercolorLine(ctx, x1, y1, x2, y2) {
+            // Watercolor brush with soft, blended edges
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            // Create a gradient for watercolor effect
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            gradient.addColorStop(0, currentColor);
+            gradient.addColorStop(0.3, adjustColor(currentColor, 20));
+            gradient.addColorStop(0.7, adjustColor(currentColor, -10));
+            gradient.addColorStop(1, currentColor);
+            
+            ctx.strokeStyle = gradient;
+            ctx.globalAlpha = brushOpacity * brushFlow * 0.6;
+            ctx.lineWidth = brushSize * 1.2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            // Add some random watercolor spots
+            for (let i = 0; i < brushSize / 2; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * brushSize * 0.8;
+                const spotX = x2 + Math.cos(angle) * radius;
+                const spotY = y2 + Math.sin(angle) * radius;
+                
+                ctx.beginPath();
+                ctx.arc(spotX, spotY, brushSize * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = adjustColor(currentColor, Math.random() * 30 - 15);
+                ctx.globalAlpha = brushOpacity * brushFlow * 0.3;
+                ctx.fill();
+            }
+        }
+        
+        function drawOilLine(ctx, x1, y1, x2, y2) {
+            // Oil paint brush with thick, textured strokes
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            // Thick stroke with texture
+            ctx.strokeStyle = currentColor;
+            ctx.globalAlpha = brushOpacity * brushFlow;
+            ctx.lineWidth = brushSize * 1.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            // Add some texture with smaller strokes
+            for (let i = 0; i < brushSize / 3; i++) {
+                const offsetX = (Math.random() - 0.5) * brushSize * 0.5;
+                const offsetY = (Math.random() - 0.5) * brushSize * 0.5;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1 + offsetX, y1 + offsetY);
+                ctx.lineTo(x2 + offsetX, y2 + offsetY);
+                ctx.strokeStyle = adjustColor(currentColor, Math.random() * 20 - 10);
+                ctx.globalAlpha = brushOpacity * brushFlow * 0.5;
+                ctx.lineWidth = brushSize * 0.3;
+                ctx.stroke();
             }
         }
         
@@ -1452,6 +1908,83 @@
             }
             
             renderLayers();
+        }
+        
+        // Symmetry functions
+        function applySymmetry(ctx, x1, y1, x2, y2) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            if (symmetryMode === 'vertical') {
+                // Vertical symmetry
+                const mirroredX1 = 2 * centerX - x1;
+                const mirroredX2 = 2 * centerX - x2;
+                
+                ctx.beginPath();
+                ctx.moveTo(mirroredX1, y1);
+                ctx.lineTo(mirroredX2, y2);
+                ctx.stroke();
+            } else if (symmetryMode === 'horizontal') {
+                // Horizontal symmetry
+                const mirroredY1 = 2 * centerY - y1;
+                const mirroredY2 = 2 * centerY - y2;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, mirroredY1);
+                ctx.lineTo(x2, mirroredY2);
+                ctx.stroke();
+            } else if (symmetryMode === 'radial') {
+                // Radial symmetry (4-way)
+                const mirroredX1 = 2 * centerX - x1;
+                const mirroredX2 = 2 * centerX - x2;
+                const mirroredY1 = 2 * centerY - y1;
+                const mirroredY2 = 2 * centerY - y2;
+                
+                // Top-right quadrant
+                ctx.beginPath();
+                ctx.moveTo(mirroredX1, y1);
+                ctx.lineTo(mirroredX2, y2);
+                ctx.stroke();
+                
+                // Bottom-left quadrant
+                ctx.beginPath();
+                ctx.moveTo(x1, mirroredY1);
+                ctx.lineTo(x2, mirroredY2);
+                ctx.stroke();
+                
+                // Bottom-right quadrant
+                ctx.beginPath();
+                ctx.moveTo(mirroredX1, mirroredY1);
+                ctx.lineTo(mirroredX2, mirroredY2);
+                ctx.stroke();
+            }
+        }
+        
+        // Eyedropper functions
+        function activateEyedropper() {
+            isEyedropperActive = true;
+            canvas.style.cursor = 'crosshair';
+            showNotification('Click on the canvas to pick a color');
+        }
+        
+        function pickColor(e) {
+            const [x, y] = getCoordinates(e);
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const color = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+            
+            currentColor = rgbToHex(pixel[0], pixel[1], pixel[2]);
+            document.getElementById('color-picker').value = currentColor;
+            addColorToHistory(currentColor);
+            updateBrushInfo();
+            updateActivePresetColor();
+            
+            isEyedropperActive = false;
+            canvas.style.cursor = 'crosshair';
+            showNotification(`Color picked: ${currentColor}`);
+        }
+        
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
         
         // Grid functions
@@ -1493,6 +2026,148 @@
                 gridCtx.lineTo(width, y);
                 gridCtx.stroke();
             }
+        }
+        
+        // Ruler functions
+        function toggleRuler() {
+            isRulerVisible = !isRulerVisible;
+            const rulerOverlay = document.getElementById('ruler-overlay');
+            
+            if (isRulerVisible) {
+                rulerOverlay.style.display = 'block';
+                drawRuler();
+                showNotification('Ruler enabled');
+            } else {
+                rulerOverlay.style.display = 'none';
+                showNotification('Ruler disabled');
+            }
+        }
+        
+        function drawRuler() {
+            const width = rulerCanvas.width;
+            const height = rulerCanvas.height;
+            
+            rulerCtx.clearRect(0, 0, width, height);
+            rulerCtx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            rulerCtx.lineWidth = 1;
+            rulerCtx.font = '10px Arial';
+            rulerCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            
+            // Draw horizontal ruler
+            for (let x = 0; x <= width; x += 50) {
+                rulerCtx.beginPath();
+                rulerCtx.moveTo(x, 0);
+                rulerCtx.lineTo(x, 15);
+                rulerCtx.stroke();
+                
+                if (x % 100 === 0) {
+                    rulerCtx.fillText(x.toString(), x - 10, 30);
+                }
+            }
+            
+            // Draw vertical ruler
+            for (let y = 0; y <= height; y += 50) {
+                rulerCtx.beginPath();
+                rulerCtx.moveTo(0, y);
+                rulerCtx.lineTo(15, y);
+                rulerCtx.stroke();
+                
+                if (y % 100 === 0 && y > 0) {
+                    rulerCtx.save();
+                    rulerCtx.translate(30, y + 5);
+                    rulerCtx.rotate(-Math.PI/2);
+                    rulerCtx.fillText(y.toString(), 0, 0);
+                    rulerCtx.restore();
+                }
+            }
+        }
+        
+        // Fullscreen functions
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                const canvasContainer = document.querySelector('.canvas-container');
+                if (canvasContainer.requestFullscreen) {
+                    canvasContainer.requestFullscreen();
+                } else if (canvasContainer.webkitRequestFullscreen) {
+                    canvasContainer.webkitRequestFullscreen();
+                } else if (canvasContainer.msRequestFullscreen) {
+                    canvasContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+        
+        function handleFullscreenChange() {
+            isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        }
+        
+        // Reference image functions
+        function showReferenceModal() {
+            showModal('reference-modal');
+        }
+        
+        function previewReferenceImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('reference-preview');
+                preview.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 200px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function loadReferenceImage() {
+            const fileInput = document.getElementById('reference-upload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('Please select an image', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                referenceImage = new Image();
+                referenceImage.onload = function() {
+                    renderLayers();
+                    hideModal('reference-modal');
+                    showNotification('Reference image loaded');
+                };
+                referenceImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Print function
+        function printCanvas() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Artwork</title>
+                        <style>
+                            body { text-align: center; margin: 20px; }
+                            img { max-width: 100%; height: auto; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${currentProject.name}</h1>
+                        <img src="${canvas.toDataURL('image/png')}" alt="Artwork">
+                        <p>Printed from InkFlow Studio</p>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
         }
         
         // Color utility functions
@@ -1627,6 +2302,7 @@
         function updateCanvasTransform() {
             canvas.style.transform = `scale(${zoomLevel})`;
             gridCanvas.style.transform = `scale(${zoomLevel})`;
+            rulerCanvas.style.transform = `scale(${zoomLevel})`;
         }
         
         // Project functions
@@ -1635,6 +2311,7 @@
             document.getElementById('canvas-width').value = '800';
             document.getElementById('canvas-height').value = '600';
             document.getElementById('canvas-background').value = '#ffffff';
+            document.getElementById('canvas-dpi').value = '300';
             showModal('new-project-modal');
         }
         
@@ -1643,6 +2320,7 @@
             const width = parseInt(document.getElementById('canvas-width').value);
             const height = parseInt(document.getElementById('canvas-height').value);
             const backgroundColor = document.getElementById('canvas-background').value;
+            const dpi = parseInt(document.getElementById('canvas-dpi').value);
             
             if (!name) {
                 showNotification('Please enter a project name', 'error');
@@ -1659,7 +2337,8 @@
                 name: name,
                 width: width,
                 height: height,
-                backgroundColor: backgroundColor
+                backgroundColor: backgroundColor,
+                dpi: dpi
             };
             
             // Resize canvases
@@ -1667,6 +2346,8 @@
             canvas.height = height;
             gridCanvas.width = width;
             gridCanvas.height = height;
+            rulerCanvas.width = width;
+            rulerCanvas.height = height;
             
             // Reset layers
             initLayers();
@@ -1769,10 +2450,21 @@
         function downloadCanvas() {
             const filename = document.getElementById('filename').value || 'inkflow-artwork';
             const format = document.getElementById('file-format').value;
+            const quality = parseFloat(document.getElementById('export-quality').value);
+            const scale = parseFloat(document.getElementById('export-scale').value);
+            
+            // Create a temporary canvas for export
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = canvas.width * scale;
+            exportCanvas.height = canvas.height * scale;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            // Draw the main canvas to the export canvas with scaling
+            exportCtx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
             
             const link = document.createElement('a');
             link.download = `${filename}.${format}`;
-            link.href = canvas.toDataURL(`image/${format}`);
+            link.href = exportCanvas.toDataURL(`image/${format}`, quality);
             link.click();
             
             hideModal('download-modal');
@@ -1854,6 +2546,14 @@
                     case 'n':
                         e.preventDefault();
                         showNewProjectModal();
+                        break;
+                    case 'g':
+                        e.preventDefault();
+                        toggleGrid();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        activateEyedropper();
                         break;
                 }
             }
