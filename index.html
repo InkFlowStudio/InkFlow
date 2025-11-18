@@ -303,12 +303,15 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #drawing-canvas {
-            display: block;
             background-color: white;
             cursor: crosshair;
+            display: block;
         }
 
         .zoom-controls {
@@ -336,6 +339,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
             color: white;
+            border: none;
         }
 
         .zoom-btn:hover {
@@ -607,7 +611,7 @@
                 </div>
             </div>
             <div class="canvas-container">
-                <canvas id="drawing-canvas"></canvas>
+                <canvas id="drawing-canvas" width="800" height="600"></canvas>
                 <div class="zoom-controls">
                     <div class="zoom-btn" id="zoom-in"><i class="fas fa-plus"></i></div>
                     <div class="zoom-display" id="zoom-display">100%</div>
@@ -727,16 +731,11 @@
         let brushOpacity = 1;
         let currentTool = 'normal';
         let zoomLevel = 1;
-        let offsetX = 0;
-        let offsetY = 0;
         let undoStack = [];
         let redoStack = [];
         
         // Initialize canvas
         function initCanvas() {
-            // Set canvas size
-            resizeCanvas();
-            
             // Set initial canvas background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -751,13 +750,6 @@
             updateBrushInfo();
         }
         
-        // Resize canvas to fit container
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-        
         // Set up all event listeners
         function setupEventListeners() {
             // Canvas events
@@ -765,11 +757,6 @@
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
-            
-            // Touch events for mobile
-            canvas.addEventListener('touchstart', handleTouchStart);
-            canvas.addEventListener('touchmove', handleTouchMove);
-            canvas.addEventListener('touchend', stopDrawing);
             
             // Color picker
             document.getElementById('color-picker').addEventListener('input', (e) => {
@@ -832,9 +819,6 @@
             // Auth buttons
             document.getElementById('login-btn').addEventListener('click', () => showModal('login-modal'));
             document.getElementById('register-btn').addEventListener('click', () => showModal('login-modal'));
-            
-            // Window resize
-            window.addEventListener('resize', resizeCanvas);
             
             // Keyboard shortcuts
             document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -911,42 +895,11 @@
         }
         
         function getCoordinates(e) {
-            let clientX, clientY;
-            
-            if (e.type.includes('touch')) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            
             const rect = canvas.getBoundingClientRect();
-            const x = (clientX - rect.left - offsetX) / zoomLevel;
-            const y = (clientY - rect.top - offsetY) / zoomLevel;
+            const x = (e.clientX - rect.left);
+            const y = (e.clientY - rect.top);
             
             return [x, y];
-        }
-        
-        // Touch event handlers
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
-        }
-        
-        function handleTouchMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
         }
         
         // Canvas controls
@@ -1003,14 +956,12 @@
         
         function resetView() {
             zoomLevel = 1;
-            offsetX = 0;
-            offsetY = 0;
             updateCanvasTransform();
             document.getElementById('zoom-display').textContent = '100%';
         }
         
         function updateCanvasTransform() {
-            canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoomLevel})`;
+            canvas.style.transform = `scale(${zoomLevel})`;
         }
         
         // Tool-specific functions
