@@ -491,6 +491,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
+            color: var(--light);
         }
 
         .form-control {
@@ -501,6 +502,15 @@
             border-radius: 6px;
             color: var(--light);
             font-size: 1rem;
+        }
+
+        .form-control::placeholder {
+            color: var(--gray);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .modal-footer {
@@ -587,6 +597,43 @@
             border-radius: 4px;
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Reference Image Panel */
+        .reference-panel {
+            background-color: var(--dark);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .reference-image-container {
+            text-align: center;
+            margin-bottom: 10px;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        .reference-image-container img {
+            max-width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+        }
+
+        .reference-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .reference-controls .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 0.8rem;
+            padding: 8px 5px;
         }
 
         /* Responsive Design */
@@ -807,6 +854,18 @@
                 <h3><i class="fas fa-eye-dropper"></i> Color Picker</h3>
                 <div class="controls">
                     <button class="btn btn-outline" id="eyedropper-btn"><i class="fas fa-eye-dropper"></i> Pick Color</button>
+                </div>
+            </div>
+            
+            <!-- Reference Image Panel -->
+            <div class="tool-group reference-panel" id="reference-panel">
+                <h3><i class="fas fa-image"></i> Reference Image</h3>
+                <div class="reference-image-container" id="reference-sidebar-image">
+                    <!-- Reference image will be shown here when in sidebar mode -->
+                </div>
+                <div class="reference-controls">
+                    <button class="btn btn-outline" id="reference-sidebar-remove"><i class="fas fa-trash"></i> Remove</button>
+                    <button class="btn btn-outline" id="reference-sidebar-toggle"><i class="fas fa-exchange-alt"></i> Move to Canvas</button>
                 </div>
             </div>
         </div>
@@ -1040,6 +1099,13 @@
                     <input type="file" id="reference-upload" class="form-control" accept="image/*">
                 </div>
                 <div class="form-group">
+                    <label for="reference-position">Reference Position</label>
+                    <select id="reference-position" class="form-control">
+                        <option value="canvas">On Canvas</option>
+                        <option value="sidebar">In Sidebar</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="reference-opacity">Opacity</label>
                     <input type="range" id="reference-opacity" class="form-control" min="10" max="100" value="50">
                 </div>
@@ -1053,6 +1119,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-reference">Cancel</button>
+                <button class="btn btn-outline" id="remove-reference-btn"><i class="fas fa-trash"></i> Remove Reference</button>
                 <button class="btn btn-primary" id="confirm-reference">Load Reference</button>
             </div>
         </div>
@@ -1110,6 +1177,7 @@
         let referenceImage = null;
         let referenceOpacity = 0.5;
         let referenceScale = 1;
+        let referencePosition = 'canvas'; // 'canvas' or 'sidebar'
         
         // Initialize canvas
         function initCanvas() {
@@ -1209,8 +1277,8 @@
             ctx.fillStyle = currentProject.backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw reference image if exists
-            if (referenceImage) {
+            // Draw reference image if exists and positioned on canvas
+            if (referenceImage && referencePosition === 'canvas') {
                 ctx.globalAlpha = referenceOpacity;
                 ctx.drawImage(
                     referenceImage, 
@@ -1500,6 +1568,10 @@
             document.getElementById('zoom-out').addEventListener('click', () => zoom(-0.1));
             document.getElementById('reset-view').addEventListener('click', resetView);
             
+            // Reference image controls
+            document.getElementById('reference-sidebar-remove').addEventListener('click', removeReference);
+            document.getElementById('reference-sidebar-toggle').addEventListener('click', toggleReferencePosition);
+            
             // Modal events
             setupModalEvents();
             
@@ -1539,14 +1611,22 @@
             // Reference image modal
             document.getElementById('confirm-reference').addEventListener('click', loadReferenceImage);
             document.getElementById('cancel-reference').addEventListener('click', () => hideModal('reference-modal'));
+            document.getElementById('remove-reference-btn').addEventListener('click', removeReference);
             document.getElementById('reference-upload').addEventListener('change', previewReferenceImage);
             document.getElementById('reference-opacity').addEventListener('input', (e) => {
                 referenceOpacity = parseInt(e.target.value) / 100;
-                renderLayers();
+                if (referencePosition === 'canvas') {
+                    renderLayers();
+                }
             });
             document.getElementById('reference-scale').addEventListener('input', (e) => {
                 referenceScale = parseInt(e.target.value) / 100;
-                renderLayers();
+                if (referencePosition === 'canvas') {
+                    renderLayers();
+                }
+            });
+            document.getElementById('reference-position').addEventListener('change', (e) => {
+                referencePosition = e.target.value;
             });
             
             // Close buttons
@@ -1648,15 +1728,16 @@
             isDrawing = false;
         }
         
+        // Fixed getCoordinates function to account for zoom
         function getCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left);
-            const y = (e.clientY - rect.top);
+            const x = (e.clientX - rect.left) / zoomLevel;
+            const y = (e.clientY - rect.top) / zoomLevel;
             
             return [x, y];
         }
         
-        // Brush drawing functions
+        // Brush drawing functions (unchanged from original)
         function drawLine(ctx, x1, y1, x2, y2) {
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -1910,7 +1991,7 @@
             renderLayers();
         }
         
-        // Symmetry functions
+        // Symmetry functions (unchanged)
         function applySymmetry(ctx, x1, y1, x2, y2) {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
@@ -1960,7 +2041,7 @@
             }
         }
         
-        // Eyedropper functions
+        // Eyedropper functions (unchanged)
         function activateEyedropper() {
             isEyedropperActive = true;
             canvas.style.cursor = 'crosshair';
@@ -1987,7 +2068,7 @@
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
         
-        // Grid functions
+        // Grid functions - fixed to cover full canvas
         function toggleGrid() {
             isGridVisible = !isGridVisible;
             const gridOverlay = document.getElementById('grid-overlay');
@@ -2003,7 +2084,11 @@
         }
         
         function drawGrid() {
-            const gridSize = 10;
+            // Ensure grid canvas matches drawing canvas size
+            gridCanvas.width = canvas.width;
+            gridCanvas.height = canvas.height;
+            
+            const gridSize = 20;
             const width = gridCanvas.width;
             const height = gridCanvas.height;
             
@@ -2028,7 +2113,7 @@
             }
         }
         
-        // Ruler functions
+        // Ruler functions - fixed to cover full canvas
         function toggleRuler() {
             isRulerVisible = !isRulerVisible;
             const rulerOverlay = document.getElementById('ruler-overlay');
@@ -2044,6 +2129,10 @@
         }
         
         function drawRuler() {
+            // Ensure ruler canvas matches drawing canvas size
+            rulerCanvas.width = canvas.width;
+            rulerCanvas.height = canvas.height;
+            
             const width = rulerCanvas.width;
             const height = rulerCanvas.height;
             
@@ -2082,7 +2171,7 @@
             }
         }
         
-        // Fullscreen functions
+        // Fullscreen functions (unchanged)
         function toggleFullscreen() {
             if (!isFullscreen) {
                 const canvasContainer = document.querySelector('.canvas-container');
@@ -2108,7 +2197,7 @@
             isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
         }
         
-        // Reference image functions
+        // Reference image functions - updated with new options
         function showReferenceModal() {
             showModal('reference-modal');
         }
@@ -2138,7 +2227,19 @@
             reader.onload = function(event) {
                 referenceImage = new Image();
                 referenceImage.onload = function() {
-                    renderLayers();
+                    // Update reference position based on selection
+                    referencePosition = document.getElementById('reference-position').value;
+                    
+                    if (referencePosition === 'canvas') {
+                        renderLayers();
+                        document.getElementById('reference-panel').style.display = 'none';
+                    } else {
+                        // Show in sidebar
+                        const sidebarImage = document.getElementById('reference-sidebar-image');
+                        sidebarImage.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 180px;">`;
+                        document.getElementById('reference-panel').style.display = 'block';
+                    }
+                    
                     hideModal('reference-modal');
                     showNotification('Reference image loaded');
                 };
@@ -2147,7 +2248,39 @@
             reader.readAsDataURL(file);
         }
         
-        // Print function
+        function removeReference() {
+            referenceImage = null;
+            document.getElementById('reference-panel').style.display = 'none';
+            renderLayers();
+            showNotification('Reference image removed');
+            hideModal('reference-modal');
+        }
+        
+        function toggleReferencePosition() {
+            if (!referenceImage) {
+                showNotification('No reference image loaded', 'error');
+                return;
+            }
+            
+            if (referencePosition === 'canvas') {
+                referencePosition = 'sidebar';
+                // Move to sidebar
+                const sidebarImage = document.getElementById('reference-sidebar-image');
+                sidebarImage.innerHTML = `<img src="${referenceImage.src}" style="max-width: 100%; max-height: 180px;">`;
+                document.getElementById('reference-panel').style.display = 'block';
+                document.getElementById('reference-sidebar-toggle').innerHTML = '<i class="fas fa-exchange-alt"></i> Move to Canvas';
+            } else {
+                referencePosition = 'canvas';
+                // Move to canvas
+                document.getElementById('reference-panel').style.display = 'none';
+                document.getElementById('reference-sidebar-toggle').innerHTML = '<i class="fas fa-exchange-alt"></i> Move to Sidebar';
+            }
+            
+            renderLayers();
+            showNotification(`Reference image moved to ${referencePosition}`);
+        }
+        
+        // Print function (unchanged)
         function printCanvas() {
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -2170,7 +2303,7 @@
             printWindow.print();
         }
         
-        // Color utility functions
+        // Color utility functions (unchanged)
         function adjustColor(color, amount) {
             // Adjust color brightness
             let usePound = false;
@@ -2211,7 +2344,7 @@
             ).toString(16).slice(1);
         }
         
-        // Canvas controls
+        // Canvas controls (unchanged)
         function clearCanvas() {
             if (confirm('Are you sure you want to clear the canvas?')) {
                 layers.forEach(layer => {
@@ -2285,7 +2418,7 @@
             }
         }
         
-        // Zoom and pan functions
+        // Zoom and pan functions - fixed for proper brush positioning
         function zoom(delta) {
             zoomLevel += delta;
             zoomLevel = Math.max(0.1, Math.min(5, zoomLevel));
@@ -2305,7 +2438,7 @@
             rulerCanvas.style.transform = `scale(${zoomLevel})`;
         }
         
-        // Project functions
+        // Project functions (unchanged)
         function showNewProjectModal() {
             document.getElementById('new-project-name').value = 'New Project';
             document.getElementById('canvas-width').value = '800';
@@ -2363,7 +2496,7 @@
             document.getElementById('project-title').textContent = currentProject.name;
         }
         
-        // Authentication functions
+        // Authentication functions (unchanged)
         function login() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
@@ -2434,7 +2567,7 @@
             }
         }
         
-        // Modal functions
+        // Modal functions (unchanged)
         function showModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
         }
@@ -2490,7 +2623,7 @@
             showNotification(`Project "${projectName}" saved successfully!`);
         }
         
-        // UI update functions
+        // UI update functions (unchanged)
         function updateBrushInfo() {
             document.getElementById('current-brush').textContent = currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
             document.getElementById('current-size').textContent = `${brushSize}px`;
@@ -2508,7 +2641,7 @@
             });
         }
         
-        // Notification system
+        // Notification system (unchanged)
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             const text = document.getElementById('notification-text');
@@ -2523,7 +2656,7 @@
             }, 3000);
         }
         
-        // Keyboard shortcuts
+        // Keyboard shortcuts (unchanged)
         function handleKeyboardShortcuts(e) {
             if (e.ctrlKey || e.metaKey) {
                 switch(e.key) {
